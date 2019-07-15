@@ -1,0 +1,18 @@
+<xs:schema elementFormDefault="qualified" targetNamespace="http://yourorganisation.org/Modbus/Types.xsd" xmlns:tns="http://yourorganisation.org/Modbus/Types.xsd" xmlns:ua="http://opcfoundation.org/UA/2008/02/Types.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:import namespace="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+    <xs:simpleType name="ModbusType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="UInt16_0"/>
+            <xs:enumeration value="UInt32_1"/>
+            <xs:enumeration value="Double_2"/>
+            <xs:enumeration value="Float_3"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element type="tns:ModbusType" name="ModbusType"/>
+    <xs:complexType name="ListOfModbusType">
+        <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="unbounded" type="tns:ModbusType" name="ModbusType" nillable="true"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element type="tns:ListOfModbusType" name="ListOfModbusType" nillable="true"/>
+</xs:schema>

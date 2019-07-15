@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModebusSlave xmlns="http://ASNeG.de/ModbusSlave.xsd">
+
+    <Device Name="TestDevice" Url="127.0.0.1:1234" Address="1" OpcUaUri="opc.tpc://ASNeG.de/ModbusSlave">
+    
+        <!-- (A + BX) / (C + DX) -->
+        <UnitConversion SourceType="mm" TargetType="m" A="0" B="1" C="1000" D="0"/>
+
+        <Data Name="PosSimple">
+            <Entry Name="PosX" Address="1" Len="2" Type="UInt16" Unit="mm" OpcUaType="Double" OpcUaUnit="m"/>
+            <Entry Name="PosY" Address="3" Len="2" Type="UInt16" Unit="mm" OpcUaType="Double" OpcUaUnit="m"/>
+	    <Entry Name="PosZ" Address="5" Len="2" Type="UInt16" Unit="mm" OpcUaType="Double" OpcUaUnit="m"/>
+        </Data>
+
+        <Data Name="PosComplex" Complex="1">
+            <Entry Name="PosX" Address="7"  Len="2" Type="UInt16" Unit="mm" OpcUaType="Double" OpcUaUnit="m"/>
+            <Entry Name="PosY" Address="9"  Len="2" Type="UInt16" Unit="mm" OpcUaType="Double" OpcUaUnit="m"/>
+	    <Entry Name="PosZ" Address="11" Len="2" Type="UInt16" Unit="mm" OpcUaType="Double" OpcUaUnit="m"/>
+        </Data>
+
+    </Device>
+
+</ModebusSlave>

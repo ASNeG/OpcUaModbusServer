@@ -1,0 +1,27 @@
+###########################
+# UaModeler Project File  #
+# Generated at 15.07.2019 #
+###########################
+
+PROJECTNAME = Modbus
+
+TEMPLATESET = ($TEMPLATES)/cpp/v1_6/t2/cpp_server.tt2set
+
+MODELS += ($MODELS)/Opc.Ua.NodeSet2.ua \
+    modbus.ua
+
+VARIABLES+= modbus.ua: CreateStringNodeIds=false; DllExportPrefix=Modbus; NamespaceName=Modbus; NamespacePrefix=Modbus; 
+
+COLORS = ($MODELS)/Opc.Ua.NodeSet2.ua: #0000ff\
+    modbus.ua: #008000
+
+OUTPUTPATH = devel/UaModeler
+
+GENERATE += modbus.ua
+
+NODEACCESSINFOROLES += Administrator \
+    SecurityAdmin \
+    ConfigurationAdmin \
+    Operator \
+    Observer
+
