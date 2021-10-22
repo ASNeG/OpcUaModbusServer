@@ -39,7 +39,10 @@ include_directories(
     ${PROJECT_BINARY_DIR}
     ${Boost_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/OpcUaModbusServer
 )
+
+include(OpcUaModbusServer/Modbus/CMakeLists.txt)
 
 file(
     GLOB 
