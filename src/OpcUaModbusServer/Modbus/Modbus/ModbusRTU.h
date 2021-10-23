@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <functional>
 #include <termios.h>
+#include "Modbus/Utility/BackgroundThread.h"
 #include "Modbus/Modbus/Modbus.h"
 
 namespace Modbus
@@ -51,6 +52,10 @@ namespace Modbus
 		int fd_ = -1;
 		TermIOS oldTermios_;
 
+		BackgroundThread backgroundThread_;
+
+		boost::asio::posix::stream_descriptor* in_ = nullptr;
+		boost::asio::posix::stream_descriptor* out_ = nullptr;
 	};
 
 }

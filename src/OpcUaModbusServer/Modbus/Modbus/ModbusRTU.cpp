@@ -233,12 +233,34 @@ namespace Modbus
 			return false;
 	    }
 
+	    // startup background thread
+	    backgroundThread_.startup();
+
+	    // create input stream and output stream
+	    in_ = new boost::asio::posix::stream_descriptor(backgroundThread_.io_context());
+	    in_->assign(fd_);
+	    out_ = new boost::asio::posix::stream_descriptor(backgroundThread_.io_context());
+	    out_->assign(fd_);
+
 		return true;
 	}
 
 	bool
 	ModbusRTU::close(void)
 	{
+		// shutdown background thread
+		backgroundThread_.shutdown();
+
+		// delete input and output stream descriptor
+		if (in_) {
+			delete in_;
+			in_ = nullptr;
+		}
+		if (out_) {
+			delete out_;
+			out_ = nullptr;
+		}
+
 		// check file descriptor
 		if (fd_ == -1) {
 			return true;
@@ -252,5 +274,6 @@ namespace Modbus
 	    fd_ = -1;
 	    return true;
 	}
+
 
 }
