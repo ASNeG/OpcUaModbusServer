@@ -15,28 +15,33 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusRTUClient_h__
-#define __Modbus_ModbusRTUClient_h__
+#ifndef __Modbus_ModbusResReadCoil_h__
+#define __Modbus_ModbusResReadCoil_h__
 
-#include <stdint.h>
-#include <functional>
-
-#include "Modbus/Modbus/ModbusRTU.h"
+#include <vector>
+#include "Modbus/Modbus/ModbusPackBase.h"
 
 namespace Modbus
 {
 
-	class ModbusRTUClient
-	: public ModbusRTU
+	class ModbusResReadCoil
+	: public ModbusPackBase
 	{
 	  public:
-		using ReadCoilResFunc = std::function<void (void)>;
 
-		ModbusRTUClient(void);
-		virtual ~ModbusRTUClient(void);
+		using SPtr = boost::shared_ptr<ModbusResReadCoil>;
 
-		bool readCoilReq(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
-		void handleReadCoilRes(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx);
+		ModbusResReadCoil(void);
+		virtual ~ModbusResReadCoil(void);
+
+		void coils(const std::vector<uint8_t>& coils);
+		std::vector<uint8_t> coils(void);
+
+		virtual bool encode(std::ostream& os) const override;
+		virtual bool decode(std::istream& is) override;
+
+	  private:
+		std::vector<uint8_t> coils_;
 	};
 
 }

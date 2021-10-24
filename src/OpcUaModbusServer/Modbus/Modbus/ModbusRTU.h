@@ -47,7 +47,7 @@ namespace Modbus
 		);
 		bool close(void);
 
-		bool sendRequest(ModbusTrx::SPtr& modbusTrx, uint8_t reqLen, uint8_t* reqBuf);
+		bool sendRequest(const ModbusTrx::SPtr& modbusTrx, uint8_t slave);
 
 	  private:
 		std::string device_ = "";
@@ -56,11 +56,11 @@ namespace Modbus
 
 		BackgroundThread backgroundThread_;
 
-		ModbusTrx::SPtr modbusTrx_ = nullptr;
 		boost::asio::posix::stream_descriptor* in_ = nullptr;
 		boost::asio::posix::stream_descriptor* out_ = nullptr;
 
-		void sendRequestBT(ModbusTrx::SPtr& modbusTrx);
+		void sendRequestStrand(const ModbusTrx::SPtr& modbusTrx);
+		void sendRequestCompleteStrand(const ModbusTrx::SPtr& modbusTrx, const boost::system::error_code& ec, size_t bt);
 	};
 
 }

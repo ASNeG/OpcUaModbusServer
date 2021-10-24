@@ -20,6 +20,8 @@
 
 #include "boost/shared_ptr.hpp"
 #include "boost/asio.hpp"
+#include "Modbus/Modbus/ModbusTypes.h"
+#include "Modbus/Modbus/ModbusPackBase.h"
 
 namespace Modbus
 {
@@ -30,10 +32,27 @@ namespace Modbus
 
 		using SPtr = boost::shared_ptr<ModbusTrx>;
 
-		ModbusTrx(void);
+		ModbusTrx(ModbusFunction modbusFunction);
 		virtual ~ModbusTrx(void);
 
-		boost::asio::streambuf sbOut_;
+		ModbusFunction modbusFunction(void);
+		void req(const ModbusPackBase::SPtr& req);
+		ModbusPackBase::SPtr& req(void);
+		void res(ModbusPackBase::SPtr& res);
+		ModbusPackBase::SPtr& res(void);
+
+		boost::asio::streambuf& sendBuffer(void);
+		boost::asio::streambuf& recvBuffer(void);
+
+		virtual void handleEvent(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx) {};
+
+	  private:
+		ModbusFunction modbusFunction_;			// modbus function
+		ModbusPackBase::SPtr req_ = nullptr;	// modbus request
+		ModbusPackBase::SPtr res_ = nullptr;	// modbus response
+
+		boost::asio::streambuf sendBuffer_;		// send stream buffer
+		boost::asio::streambuf recvBuffer_;		// receive stream buffer
 	};
 
 }

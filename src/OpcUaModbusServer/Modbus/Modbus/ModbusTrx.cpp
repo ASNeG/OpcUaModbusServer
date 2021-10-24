@@ -20,12 +20,55 @@
 namespace Modbus
 {
 
-	ModbusTrx::ModbusTrx(void)
+	ModbusTrx::ModbusTrx(ModbusFunction modbusFunction)
+	: modbusFunction_(modbusFunction)
 	{
 	}
 
 	ModbusTrx::~ModbusTrx(void)
 	{
+	}
+
+	ModbusFunction
+	ModbusTrx::modbusFunction(void)
+	{
+		return modbusFunction_;
+	}
+
+	void
+	ModbusTrx::req(const ModbusPackBase::SPtr& req)
+	{
+		req_ = req;
+	}
+
+	ModbusPackBase::SPtr&
+	ModbusTrx::req(void)
+	{
+		return req_;
+	}
+
+	void
+	ModbusTrx::res(ModbusPackBase::SPtr& res)
+	{
+		res_ = res;
+	}
+
+	ModbusPackBase::SPtr&
+	ModbusTrx::res(void)
+	{
+		return res_;
+	}
+
+	boost::asio::streambuf&
+	ModbusTrx::sendBuffer(void)
+	{
+		return sendBuffer_;
+	}
+
+	boost::asio::streambuf&
+	ModbusTrx::recvBuffer(void)
+	{
+		return recvBuffer_;
 	}
 
 }

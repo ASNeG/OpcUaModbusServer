@@ -273,30 +273,54 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTU::sendRequest(ModbusTrx::SPtr& modbusTrx, uint8_t reqLen, uint8_t* reqBuf)
+	ModbusRTU::sendRequest(const ModbusTrx::SPtr& modbusTrx, uint8_t slave)
 	{
 		// check modbus trx
-		if (modbusTrx_) {
+#if 0
+		if (sendRequestRunning_) {
 			Log(LogLevel::Error, "can not send request because sender busy")
 				.parameter("Device", device_);
 			return false;
 		}
-		modbusTrx_ = modbusTrx;
+#endif
 
-		// write buffer to stream
-		std::iostream ios(&modbusTrx->sbOut_);
-		ios.write((char*)reqBuf, (uint32_t)reqLen);
+		// encode slave
+		boost::asio::streambuf sbHeader;
+		std::iostream iosHeader(&sbHeader);
+		iosHeader.write((char*)&slave, 1);
+
+		// encode request
+		boost::asio::streambuf sbReq;
+		std::iostream iosReq(&sbReq);
+		if (!modbusTrx->req()->encode(iosReq)) {
+			Log(LogLevel::Error, "can not send request because request encoder error")
+				.parameter("Device", device_)
+				.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
+			return false;
+		}
 
 		// add crc 16 checksum
+		boost::asio::streambuf sbCRC;
+		std::iostream iosCRC(&sbCRC);
 		boost::crc_optimal<16, 0x1021, 0xFFFF, 0, false, false> crc_ccitt;
-		crc_ccitt = std::for_each((char*)reqBuf, (char*)reqBuf + reqLen, crc_ccitt);
+		crc_ccitt = std::for_each(
+			boost::asio::buffers_begin(sbReq.data()),
+			boost::asio::buffers_end(sbReq.data()),
+			crc_ccitt
+		);
 		uint8_t crc[2] = { (uint8_t)((crc_ccitt() & 0xFF00) >> 8), (uint8_t)(crc_ccitt() & 0x00FF) };
-		ios.write((char*)crc, 2);
+		iosCRC.write((char*)crc, 2);
+
+		// add data to send stream buffer
+		std::iostream ios(&modbusTrx->sendBuffer());
+		ios << iosHeader.rdbuf();
+		ios << iosReq.rdbuf();
+		ios << iosCRC.rdbuf();
 
 		// we send in the background thread
 		backgroundThread_.strand()->dispatch(
-			[this, modbusTrx](void) mutable {
-				sendRequestBT(modbusTrx);
+			[this, modbusTrx](void) {
+				sendRequestStrand(modbusTrx);
 			}
 		);
 
@@ -304,16 +328,35 @@ namespace Modbus
 	}
 
 	void
-	ModbusRTU::sendRequestBT(ModbusTrx::SPtr& modbusTrx)
+	ModbusRTU::sendRequestStrand(const ModbusTrx::SPtr& modbusTrx)
 	{
-		// client sends request to server
+		assert(!backgroundThread_.strand()->running_in_this_thread());
+
+		// send request to slave
 		boost::asio::async_write(
 			*out_,
-			modbusTrx->sbOut_,
-		    [this](const boost::system::error_code& ec, size_t bt) {
-				// FIXME: todo
-		    }
+			modbusTrx->sendBuffer(),
+			backgroundThread_.strand()->wrap(
+				[this, modbusTrx](const boost::system::error_code& ec, size_t bt) {
+					sendRequestCompleteStrand(modbusTrx, ec, bt);
+		    	}
+			)
 	    );
+	}
+
+	void
+	ModbusRTU::sendRequestCompleteStrand(const ModbusTrx::SPtr& modbusTrx, const boost::system::error_code& ec, size_t bt)
+	{
+		// check error code
+		if (ec) {
+			Log(LogLevel::Error, "send request error")
+				.parameter("Device", device_)
+				.parameter("ErrorMessage", ec.message());
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+
+		// receive response from slave
 	}
 
 }

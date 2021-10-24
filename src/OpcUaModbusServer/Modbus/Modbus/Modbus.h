@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <functional>
 
+#include "Modbus/Modbus/ModbusTrx.h"
+
 namespace Modbus
 {
 
@@ -33,7 +35,10 @@ namespace Modbus
 		Modbus(void);
 		virtual ~Modbus(void);
 
-		bool sendReadCoilReq(SendFunc sendFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
+		//virtual bool sendRequest(ModbusTrx::SPtr& modbusTrx, uint16_t reqLen, uint8_t* reqBuf) = 0;
+
+		bool sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t slave, uint16_t address, uint16_t numberCoils);
+		void recvReadCoilRes(ModbusTrx::SPtr& modbusTrx, uint16_t reqLen, uint8_t* reqBuf);
 	};
 
 }

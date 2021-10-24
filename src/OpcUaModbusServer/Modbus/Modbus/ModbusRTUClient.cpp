@@ -16,6 +16,7 @@
  */
 
 #include "Modbus/Modbus/ModbusRTUClient.h"
+#include "Modbus/Modbus/ModbusReqReadCoil.h"
 
 namespace Modbus
 {
@@ -25,8 +26,17 @@ namespace Modbus
 	{
 	  public:
 		using SPtr = boost::shared_ptr<ReadCoilTrx>;
+		using HandleResFunc = std::function<void (const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx)>;
+
+		ReadCoilTrx(void) : ModbusTrx(ModbusFunction::ReadCoils) {}
+		virtual ~ReadCoilTrx(void) {}
+
+		virtual void handleEvent(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx) override {
+			handleResFunc_(ec, modbusTrx);
+		};
 
 		ModbusRTUClient::ReadCoilResFunc readCoilResFunc_ = nullptr;
+		HandleResFunc handleResFunc_ = nullptr;
 	};
 
 	ModbusRTUClient::ModbusRTUClient(void)
@@ -39,27 +49,33 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTUClient::readCoil(
+	ModbusRTUClient::readCoilReq(
 		ReadCoilResFunc readCoilResFunc,
 		uint8_t slave,
 		uint16_t address,
 		uint16_t numberCoils
 	)
 	{
-		// create read coil request transaction
-		auto trx = boost::make_shared<ReadCoilTrx>();
-		trx->readCoilResFunc_ = readCoilResFunc;
-
-		// send function
-		SendFunc sendReqFunc = {
-			[this, trx](uint8_t reqLen, uint8_t* reqBuf) {
-				ModbusTrx::SPtr modbusTrx = trx;
-				return sendRequest(modbusTrx, reqLen, reqBuf);
-			}
+		// create read coil transaction
+		auto modbusTrx = boost::make_shared<ReadCoilTrx>();
+		modbusTrx->readCoilResFunc_ = readCoilResFunc;
+		modbusTrx->handleResFunc_ = [this](const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx) {
+			handleReadCoilRes(ec, modbusTrx);
 		};
 
-		// send read coil request
-		return sendReadCoilReq(sendReqFunc, slave, address, numberCoils);
+		// create read coil request
+		auto req = boost::make_shared<ModbusReqReadCoil>();
+		req->address(address);
+		req->numberCoils(numberCoils);
+		modbusTrx->req(req);
+
+		return sendRequest(modbusTrx, slave);
+	}
+
+	void
+	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx)
+	{
+		// FIXME: todo
 	}
 
 }

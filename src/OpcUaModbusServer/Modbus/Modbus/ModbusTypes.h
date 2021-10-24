@@ -25,7 +25,7 @@
 namespace Modbus
 {
 
-	enum class ModbusFunction {
+	enum class ModbusFunction : uint8_t {
 		ReadCoils = 0x01,
 		ReadDescreteInputs = 0x02,
 		ReadHoldingRegisters = 0x03,
@@ -46,6 +46,12 @@ namespace Modbus
 		ReadFifoQueue = 0x18,
 		EncapsulatedInterfaceTransport = 0x2B,
 	};
+
+
+	enum class ModbusError : uint8_t {
+		x = 0
+	};
+
 
 }
 
