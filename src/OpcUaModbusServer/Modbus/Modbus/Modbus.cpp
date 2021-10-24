@@ -31,7 +31,12 @@ namespace Modbus
 	}
 
 	bool
-	Modbus::sendReadCoilReq(uint8_t slave, uint16_t address, uint16_t numberCoils, ReadCoilResp readCoilResp)
+	Modbus::sendReadCoilReq(
+		SendFunc sendFunc,
+		uint8_t slave,
+		uint16_t address,
+		uint16_t numberCoils
+	)
 	{
 		uint8_t req[6];
 	    req[0] = slave;
@@ -41,8 +46,7 @@ namespace Modbus
 	    req[4] = numberCoils >> 8;
 	    req[5] = numberCoils & 0x00ff;
 
-	    auto modbusTrx = boost::make_shared<ModbusTrx>();
-	    return sendReadCoilReq(modbusTrx, req);
+	    return sendFunc(6, req);
 	}
 
 }

@@ -21,19 +21,17 @@
 #include <stdint.h>
 #include <functional>
 
-#include "Modbus/Modbus/Modbus.h"
+#include "Modbus/Modbus/ModbusRTU.h"
 
 namespace Modbus
 {
 
 	class ModbusRTUServer
-	: public Modbus
+	: public ModbusRTU
 	{
 	  public:
 		ModbusRTUServer(void);
 		virtual ~ModbusRTUServer(void);
-
-		virtual bool sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req) override;
 	};
 
 }

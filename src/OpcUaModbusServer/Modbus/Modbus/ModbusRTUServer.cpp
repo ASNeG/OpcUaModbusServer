@@ -21,18 +21,12 @@ namespace Modbus
 {
 
 	ModbusRTUServer::ModbusRTUServer(void)
-	: Modbus()
+	: ModbusRTU()
 	{
 	}
 
 	ModbusRTUServer::~ModbusRTUServer(void)
 	{
-	}
-
-	bool
-	ModbusRTUServer::sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req)
-	{
-		return true;
 	}
 
 }

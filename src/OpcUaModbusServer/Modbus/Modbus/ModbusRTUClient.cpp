@@ -20,8 +20,17 @@
 namespace Modbus
 {
 
+	class ReadCoilTrx
+	: public ModbusTrx
+	{
+	  public:
+		using SPtr = boost::shared_ptr<ReadCoilTrx>;
+
+		ModbusRTUClient::ReadCoilResFunc readCoilResFunc_ = nullptr;
+	};
+
 	ModbusRTUClient::ModbusRTUClient(void)
-	: Modbus()
+	: ModbusRTU()
 	{
 	}
 
@@ -30,9 +39,27 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTUClient::sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req)
+	ModbusRTUClient::readCoil(
+		ReadCoilResFunc readCoilResFunc,
+		uint8_t slave,
+		uint16_t address,
+		uint16_t numberCoils
+	)
 	{
-		return true;
+		// create read coil request transaction
+		auto trx = boost::make_shared<ReadCoilTrx>();
+		trx->readCoilResFunc_ = readCoilResFunc;
+
+		// send function
+		SendFunc sendReqFunc = {
+			[this, trx](uint8_t reqLen, uint8_t* reqBuf) {
+				ModbusTrx::SPtr modbusTrx = trx;
+				return sendRequest(modbusTrx, reqLen, reqBuf);
+			}
+		};
+
+		// send read coil request
+		return sendReadCoilReq(sendReqFunc, slave, address, numberCoils);
 	}
 
 }

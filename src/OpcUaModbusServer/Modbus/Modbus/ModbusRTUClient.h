@@ -21,19 +21,21 @@
 #include <stdint.h>
 #include <functional>
 
-#include "Modbus/Modbus/Modbus.h"
+#include "Modbus/Modbus/ModbusRTU.h"
 
 namespace Modbus
 {
 
 	class ModbusRTUClient
-	: public Modbus
+	: public ModbusRTU
 	{
 	  public:
+		using ReadCoilResFunc = std::function<void (void)>;
+
 		ModbusRTUClient(void);
 		virtual ~ModbusRTUClient(void);
 
-		virtual bool sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req) override;
+		bool readCoil(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
 	};
 
 }

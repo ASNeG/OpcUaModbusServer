@@ -21,22 +21,19 @@
 #include <stdint.h>
 #include <functional>
 
-#include "Modbus/Modbus/ModbusTrx.h"
-
 namespace Modbus
 {
 
 	class Modbus
 	{
 	  public:
-		using ReadCoilResp = std::function<void (uint16_t numberCoils, bool* coils)>;
+
+		using SendFunc = std::function<bool (uint8_t reqLen, uint8_t* reqBuf)>;
 
 		Modbus(void);
 		virtual ~Modbus(void);
 
-		bool sendReadCoilReq(uint8_t slave, uint16_t address, uint16_t numberCoils, ReadCoilResp readCoilResp);
-
-		virtual bool sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req) = 0;
+		bool sendReadCoilReq(SendFunc sendFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
 	};
 
 }

@@ -19,6 +19,7 @@
 #define __Modbus_ModbusTrx_h__
 
 #include "boost/shared_ptr.hpp"
+#include "boost/asio.hpp"
 
 namespace Modbus
 {
@@ -31,6 +32,8 @@ namespace Modbus
 
 		ModbusTrx(void);
 		virtual ~ModbusTrx(void);
+
+		boost::asio::streambuf sbOut_;
 	};
 
 }

@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
+#include <boost/crc.hpp>
 #include "Modbus/Utility/Log.h"
 #include "Modbus/Modbus/ModbusRTU.h"
 
@@ -37,12 +38,6 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTU::sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req)
-	{
-		return true;
-	}
-
-	bool
 	ModbusRTU::open(
 		const std::string& device,
 		uint32_t baud,
@@ -51,6 +46,8 @@ namespace Modbus
 		uint8_t stopBits
 	)
 	{
+		device_ = device;
+
 		// check baud rate
 		Speed speed;
 		switch (baud)
@@ -275,5 +272,48 @@ namespace Modbus
 	    return true;
 	}
 
+	bool
+	ModbusRTU::sendRequest(ModbusTrx::SPtr& modbusTrx, uint8_t reqLen, uint8_t* reqBuf)
+	{
+		// check modbus trx
+		if (modbusTrx_) {
+			Log(LogLevel::Error, "can not send request because sender busy")
+				.parameter("Device", device_);
+			return false;
+		}
+		modbusTrx_ = modbusTrx;
+
+		// write buffer to stream
+		std::iostream ios(&modbusTrx->sbOut_);
+		ios.write((char*)reqBuf, (uint32_t)reqLen);
+
+		// add crc 16 checksum
+		boost::crc_optimal<16, 0x1021, 0xFFFF, 0, false, false> crc_ccitt;
+		crc_ccitt = std::for_each((char*)reqBuf, (char*)reqBuf + reqLen, crc_ccitt);
+		uint8_t crc[2] = { (uint8_t)((crc_ccitt() & 0xFF00) >> 8), (uint8_t)(crc_ccitt() & 0x00FF) };
+		ios.write((char*)crc, 2);
+
+		// we send in the background thread
+		backgroundThread_.strand()->dispatch(
+			[this, modbusTrx](void) mutable {
+				sendRequestBT(modbusTrx);
+			}
+		);
+
+		return true;
+	}
+
+	void
+	ModbusRTU::sendRequestBT(ModbusTrx::SPtr& modbusTrx)
+	{
+		// client sends request to server
+		boost::asio::async_write(
+			*out_,
+			modbusTrx->sbOut_,
+		    [this](const boost::system::error_code& ec, size_t bt) {
+				// FIXME: todo
+		    }
+	    );
+	}
 
 }

@@ -22,6 +22,7 @@
 #include <functional>
 #include <termios.h>
 #include "Modbus/Utility/BackgroundThread.h"
+#include "Modbus/Modbus/ModbusTrx.h"
 #include "Modbus/Modbus/Modbus.h"
 
 namespace Modbus
@@ -46,16 +47,20 @@ namespace Modbus
 		);
 		bool close(void);
 
-		virtual bool sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t* req) override;
+		bool sendRequest(ModbusTrx::SPtr& modbusTrx, uint8_t reqLen, uint8_t* reqBuf);
 
 	  private:
+		std::string device_ = "";
 		int fd_ = -1;
 		TermIOS oldTermios_;
 
 		BackgroundThread backgroundThread_;
 
+		ModbusTrx::SPtr modbusTrx_ = nullptr;
 		boost::asio::posix::stream_descriptor* in_ = nullptr;
 		boost::asio::posix::stream_descriptor* out_ = nullptr;
+
+		void sendRequestBT(ModbusTrx::SPtr& modbusTrx);
 	};
 
 }
