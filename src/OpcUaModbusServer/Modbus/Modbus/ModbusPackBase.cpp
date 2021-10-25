@@ -35,4 +35,16 @@ namespace Modbus
 		return static_cast<uint8_t>(modbusFunction_);
 	}
 
+	bool
+	ModbusPackBase::firstPart(void)
+	{
+		return true;
+	}
+
+	bool
+	ModbusPackBase::lastPart(void)
+	{
+		return true;
+	}
+
 }

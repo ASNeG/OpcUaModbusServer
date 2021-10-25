@@ -94,7 +94,14 @@ namespace Modbus
 		is.read((char*)b, 2);
 		numberCoils_ = (b[0] << 8) + b[1];
 
+		neededSize_ = 0;
 		return true;
+	}
+
+	uint32_t
+	ModbusReqReadCoil::neededSize(void)
+	{
+		return neededSize_;
 	}
 
 }

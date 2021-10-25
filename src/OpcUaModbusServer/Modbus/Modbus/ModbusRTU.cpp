@@ -357,6 +357,75 @@ namespace Modbus
 		}
 
 		// receive response from slave
+		recvResponseStrand(modbusTrx);
 	}
+
+	void
+	ModbusRTU::recvResponseStrand(
+		const ModbusTrx::SPtr& modbusTrx
+	)
+	{
+		// receive some bytes from slave
+		uint32_t size = modbusTrx->res()->neededSize();
+
+		if (modbusTrx->res()->firstPart()) size = size + 1;	// read slave
+		if (modbusTrx->res()->lastPart()) size = size + 2; // read crc
+
+		boost::asio::async_read(
+			*out_,
+			modbusTrx->recvBuffer(),
+			boost::asio::transfer_exactly(size),
+			backgroundThread_.strand()->wrap(
+				[this, modbusTrx](const boost::system::error_code& ec, std::size_t bt) {
+					recvResponseCompleteStrand(modbusTrx, ec, bt);
+				}
+			)
+		);
+	}
+
+	void
+	ModbusRTU::recvResponseCompleteStrand(
+		const ModbusTrx::SPtr& modbusTrx,
+		const boost::system::error_code& ec,
+		size_t bt
+	)
+	{
+		uint8_t b[2];
+		bool firstPart = modbusTrx->res()->firstPart();
+		bool lastPart = modbusTrx->res()->lastPart();
+
+		// check error code
+		if (ec) {
+			Log(LogLevel::Error, "recv response error")
+				.parameter("Device", device_)
+				.parameter("ErrorMessage", ec.message());
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+
+		std::iostream ios(&modbusTrx->recvBuffer());
+
+		// decode slave
+		if (firstPart) {
+			ios.read((char*)b, 1);
+		}
+
+		// decode response
+		if (!modbusTrx->req()->encode(ios)) {
+			Log(LogLevel::Error, "can not send request because response decoder error")
+				.parameter("Device", device_)
+				.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
+			//modbusTrx->handleEvent(1, modbusTrx);
+			return;
+		}
+
+		// decode and check crc
+		if (lastPart) {
+			// decode crc
+			ios.read((char*)b, 2);
+
+			// check crc
+		}
+	};
 
 }

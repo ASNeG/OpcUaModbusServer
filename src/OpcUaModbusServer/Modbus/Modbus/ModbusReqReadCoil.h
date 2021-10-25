@@ -40,8 +40,11 @@ namespace Modbus
 
 		virtual bool encode(std::ostream& os) const override;
 		virtual bool decode(std::istream& is) override;
+		virtual uint32_t neededSize(void) override;
 
 	  private:
+		uint32_t neededSize_ = 5;
+
 		uint16_t address_ = 0;
 		uint16_t numberCoils_ = 0;
 	};

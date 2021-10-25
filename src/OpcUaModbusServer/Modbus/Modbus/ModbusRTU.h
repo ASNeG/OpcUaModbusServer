@@ -59,8 +59,22 @@ namespace Modbus
 		boost::asio::posix::stream_descriptor* in_ = nullptr;
 		boost::asio::posix::stream_descriptor* out_ = nullptr;
 
-		void sendRequestStrand(const ModbusTrx::SPtr& modbusTrx);
-		void sendRequestCompleteStrand(const ModbusTrx::SPtr& modbusTrx, const boost::system::error_code& ec, size_t bt);
+		void sendRequestStrand(
+			const ModbusTrx::SPtr& modbusTrx
+		);
+		void sendRequestCompleteStrand(
+			const ModbusTrx::SPtr& modbusTrx,
+			const boost::system::error_code& ec,
+			size_t bt
+		);
+		void recvResponseStrand(
+			const ModbusTrx::SPtr& modbusTrx
+		);
+		void recvResponseCompleteStrand(
+			const ModbusTrx::SPtr& modbusTrx,
+			const boost::system::error_code& ec,
+			size_t bt
+		);
 	};
 
 }

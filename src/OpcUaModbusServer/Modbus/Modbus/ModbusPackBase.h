@@ -35,8 +35,11 @@ namespace Modbus
 
 		uint8_t modbusFunction(void) const;
 
-		virtual bool encode(std::ostream& os) const;
-		virtual bool decode(std::istream& is);
+		virtual bool encode(std::ostream& os) const = 0;
+		virtual bool decode(std::istream& is) = 0;
+		virtual uint32_t neededSize(void) = 0;
+		virtual bool firstPart(void);
+		virtual bool lastPart(void);
 
 	  private:
 		ModbusFunction modbusFunction_;

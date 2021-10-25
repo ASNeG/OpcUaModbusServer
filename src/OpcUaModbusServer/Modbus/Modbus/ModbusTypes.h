@@ -53,6 +53,14 @@ namespace Modbus
 	};
 
 
+	enum class ModbusStep : uint8_t {
+		Step0,
+		Step1,
+		Step2,
+		Step3
+	};
+
+
 }
 
 #endif
