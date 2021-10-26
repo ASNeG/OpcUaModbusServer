@@ -21,7 +21,6 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
-#include <boost/crc.hpp>
 #include "Modbus/Utility/Log.h"
 #include "Modbus/Modbus/ModbusRTU.h"
 #include "Modbus/Modbus/ModbusError.h"
@@ -302,15 +301,13 @@ namespace Modbus
 		}
 
 		// add crc 16 checksum
+		crc16_.reset();
+		crc16_.process(sbReq, sbReq.size());
+		uint16_t checksum = crc16_.checksum();
+
 		boost::asio::streambuf sbCRC;
 		std::iostream iosCRC(&sbCRC);
-		boost::crc_optimal<16, 0x1021, 0xFFFF, 0, false, false> crc_ccitt;
-		crc_ccitt = std::for_each(
-			boost::asio::buffers_begin(sbReq.data()),
-			boost::asio::buffers_end(sbReq.data()),
-			crc_ccitt
-		);
-		uint8_t crc[2] = { (uint8_t)((crc_ccitt() & 0xFF00) >> 8), (uint8_t)(crc_ccitt() & 0x00FF) };
+		uint8_t crc[2] = { (uint8_t)((checksum & 0xFF00) >> 8), (uint8_t)(checksum & 0x00FF) };
 		iosCRC.write((char*)crc, 2);
 
 		// add data to send stream buffer
@@ -393,6 +390,7 @@ namespace Modbus
 	)
 	{
 		uint8_t b[2];
+
 		bool firstPart = modbusTrx->res()->firstPart();
 		bool lastPart = modbusTrx->res()->lastPart();
 
@@ -421,12 +419,19 @@ namespace Modbus
 			}
 		}
 
+		// calculate CRC
+		uint32_t size = modbusTrx->recvBuffer().size();
+		if (lastPart) size -= 2;
+		crc16_.reset();
+		crc16_.process(modbusTrx->recvBuffer(), size);
+
 		// decode response
-		if (!modbusTrx->req()->decode(ios)) {
-			Log(LogLevel::Error, "can not send request because response decoder error")
+		if (!modbusTrx->res()->decode(ios)) {
+			MODBUS_ERROR(ec, ModbusError::DecoderError)
+			Log(LogLevel::Error, "receive response error because response decoder error")
 				.parameter("Device", device_)
 				.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
-			//modbusTrx->handleEvent(1, modbusTrx);
+			modbusTrx->handleEvent(ec, modbusTrx);
 			return;
 		}
 
@@ -436,6 +441,18 @@ namespace Modbus
 			ios.read((char*)b, 2);
 
 			// check crc
+			uint16_t checksum = (b[0] << 8) + b[1];
+			if (!crc16_.validateChecksum(checksum)) {
+				MODBUS_ERROR(ec, ModbusError::ChecksumError)
+				Log(LogLevel::Error, "receive response error because received checksum error")
+					.parameter("Device", device_)
+					.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
+				modbusTrx->handleEvent(ec, modbusTrx);
+				return;
+			}
+
+			MODBUS_ERROR(ec, ModbusError::Success)
+			modbusTrx->handleEvent(ec, modbusTrx);
 		}
 	};
 

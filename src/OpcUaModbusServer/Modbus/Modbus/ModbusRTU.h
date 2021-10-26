@@ -24,6 +24,7 @@
 #include "Modbus/Utility/BackgroundThread.h"
 #include "Modbus/Modbus/ModbusRTUTrx.h"
 #include "Modbus/Modbus/Modbus.h"
+#include "Modbus/Utility/CRC16.h"
 
 namespace Modbus
 {
@@ -56,6 +57,7 @@ namespace Modbus
 
 		BackgroundThread backgroundThread_;
 
+		CRC16 crc16_;
 		boost::asio::posix::stream_descriptor* in_ = nullptr;
 		boost::asio::posix::stream_descriptor* out_ = nullptr;
 

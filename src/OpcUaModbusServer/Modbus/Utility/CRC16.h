@@ -15,39 +15,32 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __ModbusError_ModbusError_h__
-#define __ModbusError_ModbusError_h__
+#ifndef __Modbus_CRC16_h__
+#define __Modbus_CRC16_h__
 
-#include <boost/system/error_code.hpp>
-#include <string>
-#include <iostream>
-#include <sstream>
+#include <boost/crc.hpp>
+#include <boost/asio.hpp>
 
 namespace Modbus
 {
 
-	enum class ModbusError : int
-	{
-		Success,
-		SlaveInvalid,
-		DecoderError,
-		ChecksumError,
-	};
-
-	class ModbusErrorCategory
-	: public boost::system::error_category
+	class CRC16
 	{
 	  public:
+		CRC16(void);
+		~CRC16(void);
 
-		ModbusErrorCategory(void);
-		virtual ~ModbusErrorCategory(void);
+		void reset(void);
+		void process(
+			const boost::asio::streambuf& streambuf,
+			uint32_t len
+		);
+		uint16_t checksum(void);
+		bool validateChecksum(uint16_t checksum);
 
-		const char *name(void) const noexcept;
-		std::string message(int ev) const;
+	  private:
+		boost::crc_ccitt_type crc_ccitt_;
 	};
-
-	#define MODBUS_ERROR(error_val, error_num) ModbusErrorCategory modbusError; \
-											   boost::system::error_code error_val{(int)error_num, modbusError};
 
 }
 

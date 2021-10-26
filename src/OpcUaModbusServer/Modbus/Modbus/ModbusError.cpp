@@ -41,6 +41,8 @@ namespace Modbus
 		{
 			case ModbusError::Success: return "Success";
 			case ModbusError::SlaveInvalid: return "slave invalid";
+			case ModbusError::DecoderError: return "decoder error";
+			case ModbusError::ChecksumError: return "checksum error";
 		}
 
 		std::stringstream ss;
