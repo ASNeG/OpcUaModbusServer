@@ -21,6 +21,8 @@
 #include <string>
 #include <sstream>
 #include <functional>
+#include <iomanip>
+#include <boost/asio/streambuf.hpp>
 
 namespace Modbus
 {
@@ -52,6 +54,26 @@ namespace Modbus
 			  addParameter(parameterName, ss.str());
 			  return *this;
 		  }
+
+		Log& parameter(
+	        const std::string& parameterName,
+			const boost::asio::streambuf& streambuf
+		)
+		{
+			std::stringstream ss;
+
+			uint32_t size = streambuf.size();
+			std::vector<char> target(size);
+			buffer_copy(boost::asio::buffer(target), streambuf.data());
+
+			for (uint32_t idx = 0; idx < size; idx++) {
+				if (idx != 0) ss << " ";
+				ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)target[idx];
+			}
+
+			addParameter(parameterName, ss.str());
+			return *this;
+		}
 
 		static void logFunc(LogFunc logFunc);
 

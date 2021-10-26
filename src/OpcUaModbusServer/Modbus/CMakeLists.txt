@@ -30,3 +30,22 @@ target_link_libraries(
 # 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
+install(
+    TARGETS Modbus 
+    DESTINATION ${INSTALL_PREFIX}/lib
+)
+
+file(GLOB INC_Modbus_Modbus ${PROJECT_SOURCE_DIR}/OpcUaModbusServer/Modbus/Modbus/*.h)
+install(
+    FILES ${INC_Modbus_Modbus} 
+    DESTINATION ${INSTALL_PREFIX}/include/Modbus/Modbus
+    COMPONENT headers
+)
+
+file(GLOB INC_Modbus_Utility ${PROJECT_SOURCE_DIR}/OpcUaModbusServer/Modbus/Utility/*.h)
+install(
+    FILES ${INC_Modbus_Utility} 
+    DESTINATION ${INSTALL_PREFIX}/include/Modbus/Utility
+    COMPONENT headers
+)
+

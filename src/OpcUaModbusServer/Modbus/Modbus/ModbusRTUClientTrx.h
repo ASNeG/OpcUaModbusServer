@@ -26,7 +26,7 @@
 namespace Modbus
 {
 
-	using ReadCoilResFunc = std::function<void (void)>;
+	using ReadCoilResFunc = std::function<void (const boost::system::error_code& ec)>;
 
 	class ReadCoilTrx
 	: public ModbusRTUTrx

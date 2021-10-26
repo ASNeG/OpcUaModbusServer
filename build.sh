@@ -317,8 +317,9 @@ build_tst()
     if [ ${BUILD_FIRST} -eq 1 ] ;
     then
         cmake ../tst \
-  	     "${CMAKE_GENERATOR_LOCAL}" \
-	     -DOPCUASTACK_INSTALL_PREFIX="${STACK_PREFIX}" \
+  	  "${CMAKE_GENERATOR_LOCAL}" \
+	 -DMODBUS_INSTALL_PREFIX="${STACK_PREFIX}" \
+	 -DOPCUASTACK_INSTALL_PREFIX="${STACK_PREFIX}" \
          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
          -DGIT_COMMIT="${GIT_COMMIT}" \
          -DGIT_BRANCH="${GIT_BRANCH}"

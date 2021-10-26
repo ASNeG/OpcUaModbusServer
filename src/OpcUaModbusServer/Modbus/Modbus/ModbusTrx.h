@@ -38,7 +38,7 @@ namespace Modbus
 		ModbusFunction modbusFunction(void);
 		void req(const ModbusPackBase::SPtr& req);
 		ModbusPackBase::SPtr& req(void);
-		void res(ModbusPackBase::SPtr& res);
+		void res(const ModbusPackBase::SPtr& res);
 		ModbusPackBase::SPtr& res(void);
 
 		boost::asio::streambuf& sendBuffer(void);

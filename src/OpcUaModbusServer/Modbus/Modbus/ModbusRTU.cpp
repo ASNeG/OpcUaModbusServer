@@ -233,11 +233,9 @@ namespace Modbus
 	    // startup background thread
 	    backgroundThread_.startup();
 
-	    // create input stream and output stream
-	    in_ = new boost::asio::posix::stream_descriptor(backgroundThread_.io_context());
-	    in_->assign(fd_);
-	    out_ = new boost::asio::posix::stream_descriptor(backgroundThread_.io_context());
-	    out_->assign(fd_);
+	    // create stream descriptor
+	    sd_ = new boost::asio::posix::stream_descriptor(backgroundThread_.io_context());
+	    sd_->assign(fd_);
 
 		return true;
 	}
@@ -248,14 +246,10 @@ namespace Modbus
 		// shutdown background thread
 		backgroundThread_.shutdown();
 
-		// delete input and output stream descriptor
-		if (in_) {
-			delete in_;
-			in_ = nullptr;
-		}
-		if (out_) {
-			delete out_;
-			out_ = nullptr;
+		// delete stream descriptor
+		if (sd_) {
+			delete sd_;
+			sd_ = nullptr;
 		}
 
 		// check file descriptor
@@ -315,6 +309,10 @@ namespace Modbus
 		ios << iosHeader.rdbuf();
 		ios << iosReq.rdbuf();
 		ios << iosCRC.rdbuf();
+		Log(LogLevel::Debug, "send request")
+			.parameter("Device", device_)
+			.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction())
+			.parameter("Buffer", modbusTrx->sendBuffer());
 
 		// we send in the background thread
 		backgroundThread_.strand()->dispatch(
@@ -329,11 +327,11 @@ namespace Modbus
 	void
 	ModbusRTU::sendRequestStrand(const ModbusRTUTrx::SPtr& modbusTrx)
 	{
-		assert(!backgroundThread_.strand()->running_in_this_thread());
+		assert(backgroundThread_.strand()->running_in_this_thread());
 
 		// send request to slave
 		boost::asio::async_write(
-			*out_,
+			*sd_,
 			modbusTrx->sendBuffer(),
 			backgroundThread_.strand()->wrap(
 				[this, modbusTrx](const boost::system::error_code& ec, size_t bt) {
@@ -370,8 +368,9 @@ namespace Modbus
 		if (modbusTrx->res()->firstPart()) size = size + 1;	// read slave
 		if (modbusTrx->res()->lastPart()) size = size + 2; // read crc
 
+		std::cout << size << std::endl;
 		boost::asio::async_read(
-			*out_,
+			*sd_,
 			modbusTrx->recvBuffer(),
 			boost::asio::transfer_exactly(size),
 			backgroundThread_.strand()->wrap(
@@ -402,6 +401,11 @@ namespace Modbus
 			modbusTrx->handleEvent(ec, modbusTrx);
 			return;
 		}
+
+		Log(LogLevel::Debug, "recv response chunk")
+			.parameter("Device", device_)
+			.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction())
+			.parameter("Buffer", modbusTrx->recvBuffer());
 
 		std::iostream ios(&modbusTrx->recvBuffer());
 

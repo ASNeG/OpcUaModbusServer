@@ -52,8 +52,6 @@ namespace Modbus
 	uint16_t
 	CRC16::checksum(void)
 	{
-		//int8_t crc[2] = { (uint8_t)((crc_ccitt() & 0xFF00) >> 8), (uint8_t)(crc_ccitt() & 0x00FF) };
-		//+		uint8_t crc[2] = { (uint8_t)((checksum & 0xFF00) >> 8), (uint8_t)(checksum & 0x00FF) };
 		return (uint16_t)crc_ccitt_();
 	}
 

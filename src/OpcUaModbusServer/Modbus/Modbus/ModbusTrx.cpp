@@ -48,7 +48,7 @@ namespace Modbus
 	}
 
 	void
-	ModbusTrx::res(ModbusPackBase::SPtr& res)
+	ModbusTrx::res(const ModbusPackBase::SPtr& res)
 	{
 		res_ = res;
 	}

@@ -15,9 +15,11 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
+#include <iostream>
 #include "Modbus/Modbus/ModbusRTUTrx.h"
 #include "Modbus/Modbus/ModbusRTUClient.h"
 #include "Modbus/Modbus/ModbusReqReadCoil.h"
+#include "Modbus/Modbus/ModbusResReadCoil.h"
 
 namespace Modbus
 {
@@ -53,13 +55,18 @@ namespace Modbus
 		req->numberCoils(numberCoils);
 		modbusTrx->req(req);
 
+		// create read coil respone
+		auto res = boost::make_shared<ModbusResReadCoil>();
+		modbusTrx->res(res);
+
 		return sendRequest(modbusTrx);
 	}
 
 	void
-	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx)
+	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx)
 	{
-		// FIXME: todo
+		auto modbusTrx = reinterpret_cast<const ReadCoilTrx::SPtr&>(modbusRTUTrx);
+		modbusTrx->readCoilResFunc_(ec);
 	}
 
 }

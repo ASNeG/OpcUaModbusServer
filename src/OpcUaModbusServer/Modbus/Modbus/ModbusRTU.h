@@ -58,8 +58,7 @@ namespace Modbus
 		BackgroundThread backgroundThread_;
 
 		CRC16 crc16_;
-		boost::asio::posix::stream_descriptor* in_ = nullptr;
-		boost::asio::posix::stream_descriptor* out_ = nullptr;
+		boost::asio::posix::stream_descriptor* sd_ = nullptr;
 
 		void sendRequestStrand(
 			const ModbusRTUTrx::SPtr& modbusTrx

@@ -22,7 +22,7 @@
 namespace Modbus
 {
 
-	Log::LogFunc logFunc_ = nullptr;
+	Log::LogFunc Log::logFunc_ = nullptr;
 
 	Log::Log(LogLevel logLevel, const std::string& message)
 	{
