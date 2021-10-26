@@ -47,7 +47,7 @@ namespace Modbus
 		);
 		bool close(void);
 
-		bool sendRequest(const ModbusRTUTrx::SPtr& modbusTrx, uint8_t slave);
+		bool sendRequest(const ModbusRTUTrx::SPtr& modbusTrx);
 
 	  private:
 		std::string device_ = "";

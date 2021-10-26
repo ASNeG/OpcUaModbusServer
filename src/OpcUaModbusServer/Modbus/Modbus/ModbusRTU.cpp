@@ -24,6 +24,7 @@
 #include <boost/crc.hpp>
 #include "Modbus/Utility/Log.h"
 #include "Modbus/Modbus/ModbusRTU.h"
+#include "Modbus/Modbus/ModbusError.h"
 
 namespace Modbus
 {
@@ -273,7 +274,7 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTU::sendRequest(const ModbusRTUTrx::SPtr& modbusTrx, uint8_t slave)
+	ModbusRTU::sendRequest(const ModbusRTUTrx::SPtr& modbusTrx)
 	{
 		// check modbus trx
 #if 0
@@ -287,6 +288,7 @@ namespace Modbus
 		// encode slave
 		boost::asio::streambuf sbHeader;
 		std::iostream iosHeader(&sbHeader);
+		uint8_t slave = modbusTrx->slave();
 		iosHeader.write((char*)&slave, 1);
 
 		// encode request
@@ -405,9 +407,18 @@ namespace Modbus
 
 		std::iostream ios(&modbusTrx->recvBuffer());
 
-		// decode slave
+		// decode and check slave
 		if (firstPart) {
 			ios.read((char*)b, 1);
+
+			if (b[0] != modbusTrx->slave()) {
+				MODBUS_ERROR(ec, ModbusError::SlaveInvalid)
+				Log(LogLevel::Error, "recv response error")
+					.parameter("Device", device_)
+					.parameter("ErrorMessage", ec.message());
+				modbusTrx->handleEvent(ec, modbusTrx);
+				return;
+			}
 		}
 
 		// decode response

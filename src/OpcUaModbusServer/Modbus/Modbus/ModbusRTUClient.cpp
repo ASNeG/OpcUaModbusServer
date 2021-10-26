@@ -53,7 +53,7 @@ namespace Modbus
 		req->numberCoils(numberCoils);
 		modbusTrx->req(req);
 
-		return sendRequest(modbusTrx, slave);
+		return sendRequest(modbusTrx);
 	}
 
 	void

@@ -15,45 +15,37 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusFunction_h__
-#define __Modbus_ModbusFunction_h__
+#ifndef __ModbusError_ModbusError_h__
+#define __ModbusError_ModbusError_h__
 
+#include <boost/system/error_code.hpp>
 #include <string>
+#include <iostream>
 #include <sstream>
-#include <functional>
 
 namespace Modbus
 {
 
-	enum class ModbusFunction : uint8_t {
-		ReadCoils = 0x01,
-		ReadDescreteInputs = 0x02,
-		ReadHoldingRegisters = 0x03,
-		ReadInputRegisters = 0x04,
-		WriteSingleCoil = 0x05,
-		WriteSingleRegister = 0x06,
-		ReadExceptionStatus = 0x07,
-		Diagnostics = 0x08,
-		GetCommEventCounter = 0x0B,
-		GetCommEventLog = 0x0C,
-		WriteMultipleCoils = 0x0F,
-		WriteMultipleRegisters = 0x10,
-		ReportSlaceId = 0x11,
-		ReadFileRecord = 0x14,
-		WriteFileRecord = 0x15,
-		MaskWriteRegisters = 0x16,
-		WriteAndReadRegisters = 0x17,
-		ReadFifoQueue = 0x18,
-		EncapsulatedInterfaceTransport = 0x2B,
+	enum class ModbusError : int
+	{
+		Success,
+		SlaveInvalid,
 	};
 
-	enum class ModbusStep : uint8_t {
-		Step0,
-		Step1,
-		Step2,
-		Step3
+	class ModbusErrorCategory
+	: public boost::system::error_category
+	{
+	  public:
+
+		ModbusErrorCategory(void);
+		virtual ~ModbusErrorCategory(void);
+
+		const char *name(void) const noexcept;
+		std::string message(int ev) const;
 	};
 
+	#define MODBUS_ERROR(error_val, error_num) ModbusErrorCategory modbusError; \
+											   boost::system::error_code error_val{(int)error_num, modbusError};
 
 }
 
