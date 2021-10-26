@@ -44,8 +44,6 @@ namespace Modbus
 		boost::asio::streambuf& sendBuffer(void);
 		boost::asio::streambuf& recvBuffer(void);
 
-		virtual void handleEvent(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx) {};
-
 	  private:
 		ModbusFunction modbusFunction_;			// modbus function
 		ModbusPackBase::SPtr req_ = nullptr;	// modbus request

@@ -273,7 +273,7 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTU::sendRequest(const ModbusTrx::SPtr& modbusTrx, uint8_t slave)
+	ModbusRTU::sendRequest(const ModbusRTUTrx::SPtr& modbusTrx, uint8_t slave)
 	{
 		// check modbus trx
 #if 0
@@ -328,7 +328,7 @@ namespace Modbus
 	}
 
 	void
-	ModbusRTU::sendRequestStrand(const ModbusTrx::SPtr& modbusTrx)
+	ModbusRTU::sendRequestStrand(const ModbusRTUTrx::SPtr& modbusTrx)
 	{
 		assert(!backgroundThread_.strand()->running_in_this_thread());
 
@@ -345,7 +345,7 @@ namespace Modbus
 	}
 
 	void
-	ModbusRTU::sendRequestCompleteStrand(const ModbusTrx::SPtr& modbusTrx, const boost::system::error_code& ec, size_t bt)
+	ModbusRTU::sendRequestCompleteStrand(const ModbusRTUTrx::SPtr& modbusTrx, const boost::system::error_code& ec, size_t bt)
 	{
 		// check error code
 		if (ec) {
@@ -362,7 +362,7 @@ namespace Modbus
 
 	void
 	ModbusRTU::recvResponseStrand(
-		const ModbusTrx::SPtr& modbusTrx
+		const ModbusRTUTrx::SPtr& modbusTrx
 	)
 	{
 		// receive some bytes from slave
@@ -385,7 +385,7 @@ namespace Modbus
 
 	void
 	ModbusRTU::recvResponseCompleteStrand(
-		const ModbusTrx::SPtr& modbusTrx,
+		const ModbusRTUTrx::SPtr& modbusTrx,
 		const boost::system::error_code& ec,
 		size_t bt
 	)
@@ -411,7 +411,7 @@ namespace Modbus
 		}
 
 		// decode response
-		if (!modbusTrx->req()->encode(ios)) {
+		if (!modbusTrx->req()->decode(ios)) {
 			Log(LogLevel::Error, "can not send request because response decoder error")
 				.parameter("Device", device_)
 				.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());

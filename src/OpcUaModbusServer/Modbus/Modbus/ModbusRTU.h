@@ -22,7 +22,7 @@
 #include <functional>
 #include <termios.h>
 #include "Modbus/Utility/BackgroundThread.h"
-#include "Modbus/Modbus/ModbusTrx.h"
+#include "Modbus/Modbus/ModbusRTUTrx.h"
 #include "Modbus/Modbus/Modbus.h"
 
 namespace Modbus
@@ -47,7 +47,7 @@ namespace Modbus
 		);
 		bool close(void);
 
-		bool sendRequest(const ModbusTrx::SPtr& modbusTrx, uint8_t slave);
+		bool sendRequest(const ModbusRTUTrx::SPtr& modbusTrx, uint8_t slave);
 
 	  private:
 		std::string device_ = "";
@@ -60,18 +60,18 @@ namespace Modbus
 		boost::asio::posix::stream_descriptor* out_ = nullptr;
 
 		void sendRequestStrand(
-			const ModbusTrx::SPtr& modbusTrx
+			const ModbusRTUTrx::SPtr& modbusTrx
 		);
 		void sendRequestCompleteStrand(
-			const ModbusTrx::SPtr& modbusTrx,
+			const ModbusRTUTrx::SPtr& modbusTrx,
 			const boost::system::error_code& ec,
 			size_t bt
 		);
 		void recvResponseStrand(
-			const ModbusTrx::SPtr& modbusTrx
+			const ModbusRTUTrx::SPtr& modbusTrx
 		);
 		void recvResponseCompleteStrand(
-			const ModbusTrx::SPtr& modbusTrx,
+			const ModbusRTUTrx::SPtr& modbusTrx,
 			const boost::system::error_code& ec,
 			size_t bt
 		);

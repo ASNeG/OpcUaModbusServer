@@ -15,29 +15,12 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
+#include "Modbus/Modbus/ModbusRTUTrx.h"
 #include "Modbus/Modbus/ModbusRTUClient.h"
 #include "Modbus/Modbus/ModbusReqReadCoil.h"
 
 namespace Modbus
 {
-
-	class ReadCoilTrx
-	: public ModbusTrx
-	{
-	  public:
-		using SPtr = boost::shared_ptr<ReadCoilTrx>;
-		using HandleResFunc = std::function<void (const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx)>;
-
-		ReadCoilTrx(void) : ModbusTrx(ModbusFunction::ReadCoils) {}
-		virtual ~ReadCoilTrx(void) {}
-
-		virtual void handleEvent(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx) override {
-			handleResFunc_(ec, modbusTrx);
-		};
-
-		ModbusRTUClient::ReadCoilResFunc readCoilResFunc_ = nullptr;
-		HandleResFunc handleResFunc_ = nullptr;
-	};
 
 	ModbusRTUClient::ModbusRTUClient(void)
 	: ModbusRTU()
@@ -58,8 +41,9 @@ namespace Modbus
 	{
 		// create read coil transaction
 		auto modbusTrx = boost::make_shared<ReadCoilTrx>();
+		modbusTrx->slave(slave);
 		modbusTrx->readCoilResFunc_ = readCoilResFunc;
-		modbusTrx->handleResFunc_ = [this](const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx) {
+		modbusTrx->handleResFunc_ = [this](const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx) {
 			handleReadCoilRes(ec, modbusTrx);
 		};
 
@@ -73,7 +57,7 @@ namespace Modbus
 	}
 
 	void
-	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusTrx::SPtr& modbusTrx)
+	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx)
 	{
 		// FIXME: todo
 	}
