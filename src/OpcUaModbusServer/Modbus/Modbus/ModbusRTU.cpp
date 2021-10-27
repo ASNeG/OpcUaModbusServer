@@ -296,6 +296,7 @@ namespace Modbus
 
 		// add crc 16 checksum
 		crc16_.reset();
+		crc16_.process(slave);
 		crc16_.process(sbReq, sbReq.size());
 		uint16_t checksum = crc16_.checksum();
 

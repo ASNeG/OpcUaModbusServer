@@ -36,6 +36,14 @@ namespace Modbus
 
 	void
 	CRC16::process(
+		uint8_t byte
+	)
+	{
+		crc_ccitt_.process_byte(byte);
+	}
+
+	void
+	CRC16::process(
 		const boost::asio::streambuf& streambuf,
 		uint32_t len
 	)

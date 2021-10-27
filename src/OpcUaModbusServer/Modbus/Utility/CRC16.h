@@ -32,6 +32,9 @@ namespace Modbus
 
 		void reset(void);
 		void process(
+			uint8_t byte
+		);
+		void process(
 			const boost::asio::streambuf& streambuf,
 			uint32_t len
 		);
