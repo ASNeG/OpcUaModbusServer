@@ -16,15 +16,15 @@ include_directories(
     ./
     ${PROJECT_BINARY_DIR}
     ${MODBUS_INSTALL_PREFIX}/usr/include/
-    ../src/
+    ../tst/Modbus
     ${Boost_INCLUDE_DIRS}
 )
 
 file(
     GLOB ModbusTest_SRC 
-    ${PROJECT_SOURCE_DIR}/unittest.cpp
-    ${PROJECT_SOURCE_DIR}/Modbus/*.cpp 
-    ${PROJECT_SOURCE_DIR}/unittest.cpp
+    ${PROJECT_SOURCE_DIR}/Modbus/unittest.cpp
+    ${PROJECT_SOURCE_DIR}/Modbus/Modbus/*.cpp 
+    ${PROJECT_SOURCE_DIR}/Modbus/unittest.cpp
 )
 add_executable(
     ModbusTest
