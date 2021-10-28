@@ -17,4 +17,5 @@ build_src
 build_tst
 build_package
 build_local
-build_local_Debug/
+build_local_Debug
+build_tst_Debug

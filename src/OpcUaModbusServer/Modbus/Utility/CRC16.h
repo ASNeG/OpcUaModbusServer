@@ -35,6 +35,10 @@ namespace Modbus
 			uint8_t byte
 		);
 		void process(
+			uint8_t* buf,
+			uint32_t len
+		);
+		void process(
 			const boost::asio::streambuf& streambuf,
 			uint32_t len
 		);
@@ -42,7 +46,7 @@ namespace Modbus
 		bool validateChecksum(uint16_t checksum);
 
 	  private:
-		boost::crc_ccitt_type crc_ccitt_;
+		boost::crc_optimal<16, 0x8005, 0xFFFF, 0, true, true> crc_ccitt_;
 	};
 
 }

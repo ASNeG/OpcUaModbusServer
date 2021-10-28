@@ -68,7 +68,7 @@ namespace Modbus
 
 			for (uint32_t idx = 0; idx < size; idx++) {
 				if (idx != 0) ss << " ";
-				ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)target[idx];
+				ss << std::setw(2) << std::setfill('0') << std::hex << (uint32_t)target[idx];
 			}
 
 			addParameter(parameterName, ss.str());

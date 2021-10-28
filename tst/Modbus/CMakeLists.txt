@@ -23,7 +23,7 @@ include_directories(
 file(
     GLOB ModbusTest_SRC 
     ${PROJECT_SOURCE_DIR}/Modbus/unittest.cpp
-    ${PROJECT_SOURCE_DIR}/Modbus/Modbus/*.cpp 
+    ${PROJECT_SOURCE_DIR}/Modbus/*/*.cpp 
     ${PROJECT_SOURCE_DIR}/Modbus/unittest.cpp
 )
 add_executable(

@@ -48,6 +48,13 @@ namespace Modbus
 	{
 		device_ = device;
 
+		Log(LogLevel::Info, "open modbus rtu device")
+		    .parameter("Device", device)
+			.parameter("Baud", baud)
+			.parameter("Parity", parity)
+			.parameter("DataBits", (uint32_t)dataBits)
+			.parameter("StopBits", (uint32_t)stopBits);
+
 		// check baud rate
 		Speed speed;
 		switch (baud)
@@ -86,7 +93,7 @@ namespace Modbus
 
 		// check data bits
 		tcflag_t dataBitsFlag;
-		switch (dataBits)
+		switch ((uint32_t)dataBits)
 		{
 			case 5: dataBitsFlag = CS5; break;
 			case 6: dataBitsFlag = CS6; break;
@@ -129,6 +136,7 @@ namespace Modbus
 
 		// set input speed and output speed
 		TermIOS termios;
+		memset(&termios, 0, sizeof(struct termios));
 		if (cfsetispeed(&termios, speed) == -1) {
 			Log(LogLevel::Error, "can not open device because set output speed error")
 				.parameter("Device", device);
@@ -213,7 +221,7 @@ namespace Modbus
 	    termios.c_oflag &=~ OPOST;
 
 	    //
-	    // set specialö characters
+	    // set special characters
 	    //
 
 	    // Minimum number of characters for noncanonical read (MIN)
@@ -243,6 +251,9 @@ namespace Modbus
 	bool
 	ModbusRTU::close(void)
 	{
+		Log(LogLevel::Info, "close modbus rtu device")
+		    .parameter("Device", device_);
+
 		// shutdown background thread
 		backgroundThread_.shutdown();
 
@@ -315,12 +326,23 @@ namespace Modbus
 			.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction())
 			.parameter("Buffer", modbusTrx->sendBuffer());
 
+
+#if 1
 		// we send in the background thread
 		backgroundThread_.strand()->dispatch(
 			[this, modbusTrx](void) {
 				sendRequestStrand(modbusTrx);
 			}
 		);
+#endif
+
+#if 0
+		uint32_t buf[] = {0x01, 0x01, 0x00, 0x00, 0x00, 0x08, 0xcc, 0x3d};
+		uint32_t len = write(fd_, buf, 8);
+		std::cout << len << std::endl;
+		len = read(fd_, buf, 6);
+		std::cout << len << std::endl;
+#endif
 
 		return true;
 	}
@@ -369,7 +391,14 @@ namespace Modbus
 		if (modbusTrx->res()->firstPart()) size = size + 1;	// read slave
 		if (modbusTrx->res()->lastPart()) size = size + 2; // read crc
 
-		std::cout << size << std::endl;
+
+		uint8_t buf[3];
+		uint32_t anz = read(fd_, buf, 3);
+		std::cout << ":: " << fd_ << " "  << anz << std::endl;
+		for (uint32_t idx=0; idx<3; idx++) {
+			std::cout << (uint32_t)buf[idx] << std::endl;
+		}
+
 		boost::asio::async_read(
 			*sd_,
 			modbusTrx->recvBuffer(),
@@ -398,7 +427,9 @@ namespace Modbus
 		if (ec) {
 			Log(LogLevel::Error, "recv response error")
 				.parameter("Device", device_)
-				.parameter("ErrorMessage", ec.message());
+				.parameter("ErrorMessage", ec.message())
+				.parameter("FirstPart", firstPart)
+				.parameter("LastPart", lastPart);
 			modbusTrx->handleEvent(ec, modbusTrx);
 			return;
 		}

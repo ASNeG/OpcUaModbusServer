@@ -57,10 +57,19 @@ namespace Modbus
 		}
 	}
 
+	void
+	CRC16::process(
+		uint8_t* buf,
+		uint32_t len
+	)
+	{
+		crc_ccitt_.process_bytes(buf, len);
+	}
+
 	uint16_t
 	CRC16::checksum(void)
 	{
-		return (uint16_t)crc_ccitt_();
+		return (uint16_t)crc_ccitt_.checksum();
 	}
 
 	bool
