@@ -337,11 +337,22 @@ namespace Modbus
 #endif
 
 #if 0
-		uint32_t buf[] = {0x01, 0x01, 0x00, 0x00, 0x00, 0x08, 0xcc, 0x3d};
+		uint8_t buf[] = {0x01, 0x01, 0x00, 0x00, 0x00, 0x08, 0xcc, 0x3d};
 		uint32_t len = write(fd_, buf, 8);
-		std::cout << len << std::endl;
-		len = read(fd_, buf, 6);
-		std::cout << len << std::endl;
+		std::cout << "write bytes: " << len << std::endl;
+
+		fd_set rset;
+	    FD_ZERO(&rset);
+	    FD_SET(fd_, &rset);
+
+	    struct timeval tv;
+	    tv.tv_sec = 3;
+	    tv.tv_usec = 0;
+
+	    auto rc = ::select(fd_+1, &rset, NULL, NULL, &tv);
+	    std::cout << "select: " << rc << std::endl;
+		len = read(fd_, buf, 3);
+		std::cout << "read bytes: " << len << std::endl;
 #endif
 
 		return true;
