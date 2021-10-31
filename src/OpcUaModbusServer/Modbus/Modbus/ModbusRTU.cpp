@@ -228,7 +228,7 @@ namespace Modbus
 	    termios.c_cc[VMIN] = 0;
 
 	    // Timeout in deciseconds for noncanonical read (TIME)
-	    termios.c_cc[VTIME] = 0;
+	    termios.c_cc[VTIME] = 1;
 
 	    // save new terminal attributes
 	    if (tcsetattr(fd_, TCSANOW, &termios) < 0) {
@@ -244,7 +244,7 @@ namespace Modbus
 	    // create stream descriptor
 	    sd_ = new boost::asio::posix::stream_descriptor(backgroundThread_.io_context());
 	    sd_->assign(fd_);
-
+	    sd_->non_blocking(true);
 		return true;
 	}
 
@@ -313,7 +313,7 @@ namespace Modbus
 
 		boost::asio::streambuf sbCRC;
 		std::iostream iosCRC(&sbCRC);
-		uint8_t crc[2] = { (uint8_t)((checksum & 0xFF00) >> 8), (uint8_t)(checksum & 0x00FF) };
+		uint8_t crc[2] = {(uint8_t)(checksum & 0x00FF), (uint8_t)((checksum & 0xFF00) >> 8)};
 		iosCRC.write((char*)crc, 2);
 
 		// add data to send stream buffer
@@ -337,7 +337,7 @@ namespace Modbus
 #endif
 
 #if 0
-		uint8_t buf[] = {0x01, 0x01, 0x00, 0x00, 0x00, 0x08, 0xcc, 0x3d};
+		uint8_t buf[] = {0x01, 0x01, 0x00, 0x00, 0x00, 0x08, 0x3d, 0xcc};
 		uint32_t len = write(fd_, buf, 8);
 		std::cout << "write bytes: " << len << std::endl;
 
@@ -402,14 +402,16 @@ namespace Modbus
 		if (modbusTrx->res()->firstPart()) size = size + 1;	// read slave
 		if (modbusTrx->res()->lastPart()) size = size + 2; // read crc
 
-
+#if 0
 		uint8_t buf[3];
 		uint32_t anz = read(fd_, buf, 3);
 		std::cout << ":: " << fd_ << " "  << anz << std::endl;
 		for (uint32_t idx=0; idx<3; idx++) {
-			std::cout << (uint32_t)buf[idx] << std::endl;
+			std::cout << std::hex << (uint32_t)buf[idx] << std::endl;
 		}
+#endif
 
+		//boost::this_thread::sleep(boost::posix_time::milliseconds(20));
 		boost::asio::async_read(
 			*sd_,
 			modbusTrx->recvBuffer(),

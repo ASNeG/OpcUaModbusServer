@@ -44,4 +44,28 @@ BOOST_AUTO_TEST_CASE(RTU_ReadCoil_request_response_async)
 	BOOST_REQUIRE(modbusClient.close() == true);
 }
 
+BOOST_AUTO_TEST_CASE(RTU_ReadCoil_request_response_async1)
+{
+	bool rc;
+
+#if 0
+	while (1) {
+		ModbusRTUClient modbusClient;
+	BOOST_REQUIRE(modbusClient.open("/dev/ttyUSB0", 19200, 'E', 8, 1) == true);
+
+	bool rc = modbusClient.readCoilReq(
+		[this] (const boost::system::error_code& ec) mutable {
+			std::cout << "handleReadCoilRes" << std::endl;
+		},
+		1, 0, 8
+	);
+	BOOST_REQUIRE(rc == true);
+
+	boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+	BOOST_REQUIRE(modbusClient.close() == true);
+	boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+	}
+#endif
+}
+
 BOOST_AUTO_TEST_SUITE_END()
