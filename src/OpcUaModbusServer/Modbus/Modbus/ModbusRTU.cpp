@@ -228,7 +228,7 @@ namespace Modbus
 	    termios.c_cc[VMIN] = 0;
 
 	    // Timeout in deciseconds for noncanonical read (TIME)
-	    termios.c_cc[VTIME] = 1;
+	    termios.c_cc[VTIME] = 5;
 
 	    // save new terminal attributes
 	    if (tcsetattr(fd_, TCSANOW, &termios) < 0) {
@@ -280,15 +280,6 @@ namespace Modbus
 	bool
 	ModbusRTU::sendRequest(const ModbusRTUTrx::SPtr& modbusTrx)
 	{
-		// check modbus trx
-#if 0
-		if (sendRequestRunning_) {
-			Log(LogLevel::Error, "can not send request because sender busy")
-				.parameter("Device", device_);
-			return false;
-		}
-#endif
-
 		// encode slave
 		boost::asio::streambuf sbHeader;
 		std::iostream iosHeader(&sbHeader);
@@ -326,34 +317,12 @@ namespace Modbus
 			.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction())
 			.parameter("Buffer", modbusTrx->sendBuffer());
 
-
-#if 1
 		// we send in the background thread
 		backgroundThread_.strand()->dispatch(
 			[this, modbusTrx](void) {
 				sendRequestStrand(modbusTrx);
 			}
 		);
-#endif
-
-#if 0
-		uint8_t buf[] = {0x01, 0x01, 0x00, 0x00, 0x00, 0x08, 0x3d, 0xcc};
-		uint32_t len = write(fd_, buf, 8);
-		std::cout << "write bytes: " << len << std::endl;
-
-		fd_set rset;
-	    FD_ZERO(&rset);
-	    FD_SET(fd_, &rset);
-
-	    struct timeval tv;
-	    tv.tv_sec = 3;
-	    tv.tv_usec = 0;
-
-	    auto rc = ::select(fd_+1, &rset, NULL, NULL, &tv);
-	    std::cout << "select: " << rc << std::endl;
-		len = read(fd_, buf, 3);
-		std::cout << "read bytes: " << len << std::endl;
-#endif
 
 		return true;
 	}
@@ -402,15 +371,6 @@ namespace Modbus
 		if (modbusTrx->res()->firstPart()) size = size + 1;	// read slave
 		if (modbusTrx->res()->lastPart()) size = size + 2; // read crc
 
-#if 0
-		uint8_t buf[3];
-		uint32_t anz = read(fd_, buf, 3);
-		std::cout << ":: " << fd_ << " "  << anz << std::endl;
-		for (uint32_t idx=0; idx<3; idx++) {
-			std::cout << std::hex << (uint32_t)buf[idx] << std::endl;
-		}
-#endif
-
 		//boost::this_thread::sleep(boost::posix_time::milliseconds(20));
 		boost::asio::async_read(
 			*sd_,
@@ -458,6 +418,9 @@ namespace Modbus
 		if (firstPart) {
 			ios.read((char*)b, 1);
 
+			crc16_.reset();
+			crc16_.process(b, 1);
+
 			if (b[0] != modbusTrx->slave()) {
 				MODBUS_ERROR(ec, ModbusError::SlaveInvalid)
 				Log(LogLevel::Error, "recv response error")
@@ -471,7 +434,6 @@ namespace Modbus
 		// calculate CRC
 		uint32_t size = modbusTrx->recvBuffer().size();
 		if (lastPart) size -= 2;
-		crc16_.reset();
 		crc16_.process(modbusTrx->recvBuffer(), size);
 
 		// decode response
@@ -490,7 +452,7 @@ namespace Modbus
 			ios.read((char*)b, 2);
 
 			// check crc
-			uint16_t checksum = (b[0] << 8) + b[1];
+			uint16_t checksum = (b[1] << 8) + b[0];
 			if (!crc16_.validateChecksum(checksum)) {
 				MODBUS_ERROR(ec, ModbusError::ChecksumError)
 				Log(LogLevel::Error, "receive response error because received checksum error")
@@ -502,7 +464,11 @@ namespace Modbus
 
 			MODBUS_ERROR(ec, ModbusError::Success)
 			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
 		}
+
+		// read next chunk
+		recvResponseStrand(modbusTrx);
 	};
 
 }

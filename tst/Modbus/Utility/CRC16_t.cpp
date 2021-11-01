@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(RTU_CRC16_)
 	std::cout << "RTU_CRC16_t" << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(RTU_CRC16_process_bytes)
+BOOST_AUTO_TEST_CASE(RTU_CRC16_process_bytes1)
 {
 	CRC16 crc;
 
@@ -19,6 +19,16 @@ BOOST_AUTO_TEST_CASE(RTU_CRC16_process_bytes)
 
 	crc.process(buf, 6);
 	BOOST_REQUIRE(crc.checksum() == 0xCC3D);
+}
+
+BOOST_AUTO_TEST_CASE(RTU_CRC16_process_bytes2)
+{
+	CRC16 crc;
+
+	uint8_t buf[] = {0x01, 0x01, 0x01, 0x00};
+
+	crc.process(buf, 4);
+	BOOST_REQUIRE(crc.checksum() == 0x8851);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

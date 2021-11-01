@@ -16,6 +16,7 @@
  */
 
 #include "Modbus/Utility/CRC16.h"
+#include <iostream>
 
 namespace Modbus
 {
