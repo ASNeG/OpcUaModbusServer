@@ -15,34 +15,34 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "Modbus/Modbus/ModbusError.h"
+#include "Modbus/ModbusRTU/ModbusRTUException.h"
 
 namespace Modbus
 {
 
-	ModbusErrorCategory::ModbusErrorCategory(void)
+	ModbusRTUExceptionCategory::ModbusRTUExceptionCategory(void)
 	{
 	}
 
-	ModbusErrorCategory::~ModbusErrorCategory(void)
+	ModbusRTUExceptionCategory::~ModbusRTUExceptionCategory(void)
 	{
 	}
 
 	const char*
-	ModbusErrorCategory::name(void) const noexcept
+	ModbusRTUExceptionCategory::name(void) const noexcept
 	{
-		return "ModbusError";
+		return "ModbusRTUException";
 	}
 
 	std::string
-	ModbusErrorCategory::message(int ev) const
+	ModbusRTUExceptionCategory::message(int ev) const
 	{
-		switch ((ModbusError)ev)
+		switch ((ModbusRTUException)ev)
 		{
-			case ModbusError::Success: return "Success";
-			case ModbusError::SlaveInvalid: return "slave invalid";
-			case ModbusError::DecoderError: return "decoder error";
-			case ModbusError::ChecksumError: return "checksum error";
+			case ModbusRTUException::Success: return "Success";
+			case ModbusRTUException::SlaveInvalid: return "slave invalid";
+			case ModbusRTUException::DecoderError: return "decoder error";
+			case ModbusRTUException::ChecksumError: return "checksum error";
 		}
 
 		std::stringstream ss;

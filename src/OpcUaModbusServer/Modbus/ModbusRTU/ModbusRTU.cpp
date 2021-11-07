@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include "Modbus/Utility/Log.h"
 #include "Modbus/ModbusRTU/ModbusRTU.h"
-#include "Modbus/Modbus/ModbusError.h"
+#include "Modbus/ModbusRTU/ModbusRTUException.h"
 
 namespace Modbus
 {
@@ -422,7 +422,7 @@ namespace Modbus
 			crc16_.process(b, 1);
 
 			if (b[0] != modbusTrx->slave()) {
-				MODBUS_ERROR(ec, ModbusError::SlaveInvalid)
+				MODBUS_RTU_ERROR(ec, ModbusRTUException::SlaveInvalid)
 				Log(LogLevel::Error, "recv response error")
 					.parameter("Device", device_)
 					.parameter("ErrorMessage", ec.message());
@@ -438,7 +438,7 @@ namespace Modbus
 
 		// decode response
 		if (!modbusTrx->res()->decode(ios)) {
-			MODBUS_ERROR(ec, ModbusError::DecoderError)
+			MODBUS_RTU_ERROR(ec, ModbusRTUException::DecoderError)
 			Log(LogLevel::Error, "receive response error because response decoder error")
 				.parameter("Device", device_)
 				.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
@@ -454,7 +454,7 @@ namespace Modbus
 			// check crc
 			uint16_t checksum = (b[1] << 8) + b[0];
 			if (!crc16_.validateChecksum(checksum)) {
-				MODBUS_ERROR(ec, ModbusError::ChecksumError)
+				MODBUS_RTU_ERROR(ec, ModbusRTUException::ChecksumError)
 				Log(LogLevel::Error, "receive response error because received checksum error")
 					.parameter("Device", device_)
 					.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
@@ -462,7 +462,7 @@ namespace Modbus
 				return;
 			}
 
-			MODBUS_ERROR(ec, ModbusError::Success)
+			MODBUS_RTU_ERROR(ec, ModbusRTUException::Success)
 			modbusTrx->handleEvent(ec, modbusTrx);
 			return;
 		}

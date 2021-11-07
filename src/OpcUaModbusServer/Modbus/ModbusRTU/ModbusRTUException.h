@@ -15,8 +15,8 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __ModbusError_ModbusError_h__
-#define __ModbusError_ModbusError_h__
+#ifndef __Modbus_ModbusRTUException_h__
+#define __Modbus_ModbusRTUException_h__
 
 #include <boost/system/error_code.hpp>
 #include <string>
@@ -26,7 +26,7 @@
 namespace Modbus
 {
 
-	enum class ModbusError : int
+	enum class ModbusRTUException : int
 	{
 		Success,
 		SlaveInvalid,
@@ -34,20 +34,20 @@ namespace Modbus
 		ChecksumError,
 	};
 
-	class ModbusErrorCategory
+	class ModbusRTUExceptionCategory
 	: public boost::system::error_category
 	{
 	  public:
 
-		ModbusErrorCategory(void);
-		virtual ~ModbusErrorCategory(void);
+		ModbusRTUExceptionCategory(void);
+		virtual ~ModbusRTUExceptionCategory(void);
 
 		const char *name(void) const noexcept;
 		std::string message(int ev) const;
 	};
 
-	#define MODBUS_ERROR(error_val, error_num) ModbusErrorCategory modbusError; \
-											   boost::system::error_code error_val{(int)error_num, modbusError};
+	#define MODBUS_RTU_ERROR(error_val, error_num) ModbusRTUExceptionCategory ModbusRTUException; \
+			boost::system::error_code error_val{(int)error_num, ModbusRTUException};
 
 }
 
