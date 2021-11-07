@@ -15,30 +15,23 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusRTUClient_h__
-#define __Modbus_ModbusRTUClient_h__
+#ifndef __Modbus_ModbusRTUServer_h__
+#define __Modbus_ModbusRTUServer_h__
 
 #include <stdint.h>
 #include <functional>
 
-#include "Modbus/Modbus/ModbusRTU.h"
-#include "Modbus/Modbus/ModbusRTUClientTrx.h"
+#include "Modbus/ModbusRTU/ModbusRTU.h"
 
 namespace Modbus
 {
 
-	class ModbusRTUClient
+	class ModbusRTUServer
 	: public ModbusRTU
 	{
 	  public:
-		ModbusRTUClient(void);
-		virtual ~ModbusRTUClient(void);
-
-		bool readCoilReq(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
-
-	  private:
-
-		void handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx);
+		ModbusRTUServer(void);
+		virtual ~ModbusRTUServer(void);
 	};
 
 }

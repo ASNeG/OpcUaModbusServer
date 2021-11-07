@@ -15,30 +15,9 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "Modbus/Modbus/ModbusRTUTrx.h"
+#include "Modbus/ModbusRTU/ModbusRTUClientTrx.h"
 
 namespace Modbus
 {
-
-	ModbusRTUTrx::ModbusRTUTrx(ModbusFunction modbusFunction)
-	: ModbusTrx(modbusFunction)
-	{
-	}
-
-	ModbusRTUTrx::~ModbusRTUTrx(void)
-	{
-	}
-
-	void
-	ModbusRTUTrx::slave(uint8_t slave)
-	{
-		slave_ = slave;
-	}
-
-	uint8_t
-	ModbusRTUTrx::slave(void)
-	{
-		return slave_;
-	}
 
 }

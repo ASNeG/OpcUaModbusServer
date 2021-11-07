@@ -2,7 +2,7 @@
 #include <string>
 #include <sstream>
 #include <boost/thread/future.hpp>
-#include "Modbus/ModbusRTUClient.h"
+#include "Modbus/ModbusRTU/ModbusRTUClient.h"
 
 using namespace Modbus;
 

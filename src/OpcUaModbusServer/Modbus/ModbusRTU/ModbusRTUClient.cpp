@@ -16,8 +16,8 @@
  */
 
 #include <iostream>
-#include "Modbus/Modbus/ModbusRTUTrx.h"
-#include "Modbus/Modbus/ModbusRTUClient.h"
+#include "Modbus/ModbusRTU/ModbusRTUTrx.h"
+#include "Modbus/ModbusRTU/ModbusRTUClient.h"
 #include "Modbus/Modbus/ModbusReqReadCoil.h"
 #include "Modbus/Modbus/ModbusResReadCoil.h"
 

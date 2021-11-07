@@ -21,7 +21,7 @@
 #include <functional>
 #include <boost/shared_ptr.hpp>
 #include "Modbus/Modbus/ModbusTypes.h"
-#include "Modbus/Modbus/ModbusRTUTrx.h"
+#include "Modbus/ModbusRTU/ModbusRTUTrx.h"
 
 namespace Modbus
 {

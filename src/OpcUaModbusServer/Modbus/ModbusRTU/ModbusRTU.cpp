@@ -22,7 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "Modbus/Utility/Log.h"
-#include "Modbus/Modbus/ModbusRTU.h"
+#include "Modbus/ModbusRTU/ModbusRTU.h"
 #include "Modbus/Modbus/ModbusError.h"
 
 namespace Modbus

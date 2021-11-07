@@ -15,25 +15,30 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusRTUServer_h__
-#define __Modbus_ModbusRTUServer_h__
-
-#include <stdint.h>
-#include <functional>
-
-#include "Modbus/Modbus/ModbusRTU.h"
+#include "Modbus/ModbusRTU/ModbusRTUTrx.h"
 
 namespace Modbus
 {
 
-	class ModbusRTUServer
-	: public ModbusRTU
+	ModbusRTUTrx::ModbusRTUTrx(ModbusFunction modbusFunction)
+	: ModbusTrx(modbusFunction)
 	{
-	  public:
-		ModbusRTUServer(void);
-		virtual ~ModbusRTUServer(void);
-	};
+	}
+
+	ModbusRTUTrx::~ModbusRTUTrx(void)
+	{
+	}
+
+	void
+	ModbusRTUTrx::slave(uint8_t slave)
+	{
+		slave_ = slave;
+	}
+
+	uint8_t
+	ModbusRTUTrx::slave(void)
+	{
+		return slave_;
+	}
 
 }
-
-#endif
