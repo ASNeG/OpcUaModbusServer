@@ -30,29 +30,4 @@ namespace Modbus
 	{
 	}
 
-	bool
-	Modbus::sendReadCoilReq(
-		ModbusTrx::SPtr& modbusTrx,
-		uint8_t slave,
-		uint16_t address,
-		uint16_t numberCoils
-	)
-	{
-		uint8_t reqBuf[6];
-		reqBuf[0] = slave;
-		reqBuf[1] = (uint8_t)ModbusFunction::ReadCoils;
-		reqBuf[2] = address >> 8;
-	    reqBuf[3] = address & 0x00ff;
-	    reqBuf[4] = numberCoils >> 8;
-	    reqBuf[5] = numberCoils & 0x00ff;
-
-	    return true;
-	    //return sendRequest(modbusTrx, 6, reqBuf);
-	}
-
-	void
-	Modbus::recvReadCoilRes(ModbusTrx::SPtr& modbusTrx, uint16_t reqLen, uint8_t* reqBuf)
-	{
-	}
-
 }

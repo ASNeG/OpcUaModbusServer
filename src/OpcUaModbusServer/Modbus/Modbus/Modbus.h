@@ -29,16 +29,8 @@ namespace Modbus
 	class Modbus
 	{
 	  public:
-
-		using SendFunc = std::function<bool (uint8_t reqLen, uint8_t* reqBuf)>;
-
 		Modbus(void);
 		virtual ~Modbus(void);
-
-		//virtual bool sendRequest(ModbusTrx::SPtr& modbusTrx, uint16_t reqLen, uint8_t* reqBuf) = 0;
-
-		bool sendReadCoilReq(ModbusTrx::SPtr& modbusTrx, uint8_t slave, uint16_t address, uint16_t numberCoils);
-		void recvReadCoilRes(ModbusTrx::SPtr& modbusTrx, uint16_t reqLen, uint8_t* reqBuf);
 	};
 
 }
