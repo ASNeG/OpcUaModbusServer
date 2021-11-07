@@ -15,7 +15,7 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include <Modbus/Modbus/ModbusResReadCoil.h>
+#include "Modbus/Modbus/ModbusResReadCoil.h"
 
 namespace Modbus
 {
@@ -74,11 +74,24 @@ namespace Modbus
 			  // decode modbus function
 			  is.read((char*)&b, 1);
 			  if (b != modbusFunction()) {
+
+				  if (b == modbusFunction() + 0x80) {
+					  decodeEC(is);
+				  }
+				  else {
+					  is.read((char*)&b, 1);
+					  ec(ModbusException::IllegalFunction);
+				  }
+
 				  return false;
 			  }
 
 			  // decode number of coil bytes
 			  is.read((char*)&b, 1);
+			  if ((uint32_t)b > 251) {
+				  ec(ModbusException::IllegalDataValue);
+				  return false;
+			  }
 
 			  neededSize_ = (uint32_t)b;
 			  modbusStep_ = ModbusStep::Step1;

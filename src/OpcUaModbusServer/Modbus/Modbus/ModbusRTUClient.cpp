@@ -41,8 +41,10 @@ namespace Modbus
 		uint16_t numberCoils
 	)
 	{
+		std::vector<bool> coilVec;
+
 		// create read coil transaction
-		auto modbusTrx = boost::make_shared<ReadCoilTrx>();
+		auto modbusTrx = boost::make_shared<ReadCoilRTUClientTrx>();
 		modbusTrx->slave(slave);
 		modbusTrx->readCoilResFunc_ = readCoilResFunc;
 		modbusTrx->handleResFunc_ = [this](const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx) {
@@ -65,8 +67,39 @@ namespace Modbus
 	void
 	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx)
 	{
-		auto modbusTrx = reinterpret_cast<const ReadCoilTrx::SPtr&>(modbusRTUTrx);
-		modbusTrx->readCoilResFunc_(ec);
+		std::vector<bool> coilVec;
+
+		auto modbusTrx = reinterpret_cast<const ReadCoilRTUClientTrx::SPtr&>(modbusRTUTrx);
+		if (ec) {
+			modbusTrx->readCoilResFunc_(ec, coilVec);
+			return;
+		}
+
+		// check response
+		auto req = reinterpret_cast<const ModbusReqReadCoil::SPtr&>(modbusTrx->req());
+		auto res = reinterpret_cast<const ModbusResReadCoil::SPtr&>(modbusTrx->res());
+
+		// get coils from response
+		uint16_t numCoils = req->numberCoils();
+		for (uint32_t idx = 0; idx < res->coils().size(); idx++) {
+			uint8_t byte = res->coils()[idx];
+			int8_t byteIndex = 7;
+			while (byteIndex >= 0 && numCoils > 0) {
+
+				if ((byte & (0x01 << byteIndex)) > 0) {
+					coilVec.push_back(true);
+				}
+				else {
+					coilVec.push_back(false);
+				}
+
+				numCoils--;
+				byteIndex--;
+			}
+		}
+
+		// call coil response function
+		modbusTrx->readCoilResFunc_(ec, coilVec);
 	}
 
 }

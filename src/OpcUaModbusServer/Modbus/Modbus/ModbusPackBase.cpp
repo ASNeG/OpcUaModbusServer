@@ -15,7 +15,8 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include <Modbus/Modbus/ModbusPackBase.h>
+#include "Modbus/Modbus/ModbusPackBase.h"
+#include "Modbus/Modbus/ModbusException.h"
 
 namespace Modbus
 {
@@ -35,6 +36,19 @@ namespace Modbus
 		return static_cast<uint8_t>(modbusFunction_);
 	}
 
+	boost::system::error_code
+	ModbusPackBase::ec(void)
+	{
+		return ec_;
+	}
+
+	void
+	ModbusPackBase::ec(ModbusException ec)
+	{
+		MODBUS_EXCEPTION(errorCode, ec)
+		ec_ = errorCode;
+	}
+
 	bool
 	ModbusPackBase::firstPart(void)
 	{
@@ -44,6 +58,20 @@ namespace Modbus
 	bool
 	ModbusPackBase::lastPart(void)
 	{
+		return true;
+	}
+
+	bool
+	ModbusPackBase::decodeEC(std::istream& is)
+	{
+		uint8_t ec;
+
+		// decode error code
+		is.read((char*)&ec, 1);
+
+		MODBUS_EXCEPTION(errorCode, (uint32_t)ec)
+		ec_ = errorCode;
+
 		return true;
 	}
 

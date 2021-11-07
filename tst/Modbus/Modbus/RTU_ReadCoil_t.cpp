@@ -32,8 +32,10 @@ BOOST_AUTO_TEST_CASE(RTU_ReadCoil_request_response_async)
 
 	boost::promise<void>* pp =  &p;
 	bool rc = modbusClient.readCoilReq(
-		[this, pp] (const boost::system::error_code& ec) mutable {
+		[this, pp] (const boost::system::error_code& ec, std::vector<bool>& coilVec) mutable {
 			std::cout << "handleReadCoilRes" << std::endl;
+			std::cout << "size=" << coilVec.size() << std::endl;
+			for (auto coil : coilVec) std::cout << coil << std::endl;
 			pp->set_value();
 		},
 		1, 0, 8
