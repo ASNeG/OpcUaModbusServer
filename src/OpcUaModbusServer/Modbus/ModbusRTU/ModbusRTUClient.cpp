@@ -20,6 +20,8 @@
 #include "Modbus/ModbusRTU/ModbusRTUClient.h"
 #include "Modbus/Modbus/ModbusReqReadCoil.h"
 #include "Modbus/Modbus/ModbusResReadCoil.h"
+#include "Modbus/Modbus/ModbusReqReadDiscreteInputs.h"
+#include "Modbus/Modbus/ModbusResReadDiscreteInputs.h"
 
 namespace Modbus
 {
@@ -64,6 +66,37 @@ namespace Modbus
 		return sendRequest(modbusTrx);
 	}
 
+	bool
+	ModbusRTUClient::readDiscreteInputsReq(
+		ReadDiscreteInputsResFunc readDiscreteInputsResFunc,
+		uint8_t slave,
+		uint16_t address,
+		uint16_t numberInputs
+	)
+	{
+		std::vector<bool> inputVec;
+
+		// create read discrete inputs transaction
+		auto modbusTrx = boost::make_shared<ReadDiscreteInputsRTUClientTrx>();
+		modbusTrx->slave(slave);
+		modbusTrx->readDiscreteInputsResFunc_ = readDiscreteInputsResFunc;
+		modbusTrx->handleResFunc_ = [this](const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx) {
+			handleReadDiscreteInputsRes(ec, modbusTrx);
+		};
+
+		// create read discrete inputs request
+		auto req = boost::make_shared<ModbusReqReadDiscreteInputs>();
+		req->address(address);
+		req->numberInputs(numberInputs);
+		modbusTrx->req(req);
+
+		// create read discrete inputs respone
+		auto res = boost::make_shared<ModbusResReadDiscreteInputs>();
+		modbusTrx->res(res);
+
+		return sendRequest(modbusTrx);
+	}
+
 	void
 	ModbusRTUClient::handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx)
 	{
@@ -100,6 +133,44 @@ namespace Modbus
 
 		// call coil response function
 		modbusTrx->readCoilResFunc_(ec, coilVec);
+	}
+
+	void
+	ModbusRTUClient::handleReadDiscreteInputsRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx)
+	{
+		std::vector<bool> inputsVec;
+
+		auto modbusTrx = reinterpret_cast<const ReadDiscreteInputsRTUClientTrx::SPtr&>(modbusRTUTrx);
+		if (ec) {
+			modbusTrx->readDiscreteInputsResFunc_(ec, inputsVec);
+			return;
+		}
+
+		// check response
+		auto req = reinterpret_cast<const ModbusReqReadDiscreteInputs::SPtr&>(modbusTrx->req());
+		auto res = reinterpret_cast<const ModbusResReadDiscreteInputs::SPtr&>(modbusTrx->res());
+
+		// get inputs from response
+		uint16_t numInputs = req->numberInputs();
+		for (uint32_t idx = 0; idx < res->inputs().size(); idx++) {
+			uint8_t byte = res->inputs()[idx];
+			int8_t byteIndex = 7;
+			while (byteIndex >= 0 && numInputs > 0) {
+
+				if ((byte & (0x01 << byteIndex)) > 0) {
+					inputsVec.push_back(true);
+				}
+				else {
+					inputsVec.push_back(false);
+				}
+
+				numInputs--;
+				byteIndex--;
+			}
+		}
+
+		// call coil response function
+		modbusTrx->readDiscreteInputsResFunc_(ec, inputsVec);
 	}
 
 }

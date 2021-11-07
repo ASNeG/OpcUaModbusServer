@@ -35,10 +35,12 @@ namespace Modbus
 		virtual ~ModbusRTUClient(void);
 
 		bool readCoilReq(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
+		bool readDiscreteInputsReq(ReadDiscreteInputsResFunc readDiscreteInptusResFunc, uint8_t slave, uint16_t address, uint16_t numberInputs);
 
 	  private:
 
 		void handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx);
+		void handleReadDiscreteInputsRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx);
 	};
 
 }
