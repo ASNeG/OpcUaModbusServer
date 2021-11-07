@@ -67,7 +67,7 @@ namespace Modbus
 		b[1] = address_ & 0x00ff;
 		os.write((char*)b, 2);
 
-		// encode number of coils
+		// encode number of inputs
 		b[0] = numberInputs_ >> 8;
 		b[1] = numberInputs_ & 0x00ff;
 		os.write((char*)b, 2);
@@ -90,7 +90,7 @@ namespace Modbus
 		is.read((char*)b, 2);
 		address_ = (b[0] << 8) + b[1];
 
-		// decode number of coils
+		// decode number of inputs
 		is.read((char*)b, 2);
 		numberInputs_ = (b[0] << 8) + b[1];
 
