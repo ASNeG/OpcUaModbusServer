@@ -32,6 +32,8 @@ namespace Modbus
 	  public:
 		ModbusRTUServer(void);
 		virtual ~ModbusRTUServer(void);
+
+		bool registerModbusFunction(void);
 	};
 
 }
