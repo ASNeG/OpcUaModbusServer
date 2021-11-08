@@ -15,39 +15,18 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "Modbus/Modbus/ModbusError.h"
+#include "Modbus/ModbusRTU/ModbusRTUServer.h"
 
 namespace Modbus
 {
 
-	ModbusErrorCategory::ModbusErrorCategory(void)
+	ModbusRTUServer::ModbusRTUServer(void)
+	: ModbusRTU()
 	{
 	}
 
-	ModbusErrorCategory::~ModbusErrorCategory(void)
+	ModbusRTUServer::~ModbusRTUServer(void)
 	{
-	}
-
-	const char*
-	ModbusErrorCategory::name(void) const noexcept
-	{
-		return "ModbusError";
-	}
-
-	std::string
-	ModbusErrorCategory::message(int ev) const
-	{
-		switch ((ModbusError)ev)
-		{
-			case ModbusError::Success: return "Success";
-			case ModbusError::SlaveInvalid: return "slave invalid";
-			case ModbusError::DecoderError: return "decoder error";
-			case ModbusError::ChecksumError: return "checksum error";
-		}
-
-		std::stringstream ss;
-		ss << "unknown error (" << ev << ")";
-		return ss.str();
 	}
 
 }

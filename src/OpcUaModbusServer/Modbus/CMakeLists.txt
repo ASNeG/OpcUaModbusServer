@@ -42,6 +42,13 @@ install(
     COMPONENT headers
 )
 
+file(GLOB INC_Modbus_ModbusRTU ${PROJECT_SOURCE_DIR}/OpcUaModbusServer/Modbus/ModbusRTU/*.h)
+install(
+    FILES ${INC_Modbus_ModbusRTU} 
+    DESTINATION ${INSTALL_PREFIX}/include/Modbus/ModbusRTU
+    COMPONENT headers
+)
+
 file(GLOB INC_Modbus_Utility ${PROJECT_SOURCE_DIR}/OpcUaModbusServer/Modbus/Utility/*.h)
 install(
     FILES ${INC_Modbus_Utility} 

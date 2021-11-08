@@ -15,18 +15,9 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "Modbus/Modbus/ModbusRTUServer.h"
+#include "Modbus/ModbusRTU/ModbusRTUClientTrx.h"
 
 namespace Modbus
 {
-
-	ModbusRTUServer::ModbusRTUServer(void)
-	: ModbusRTU()
-	{
-	}
-
-	ModbusRTUServer::~ModbusRTUServer(void)
-	{
-	}
 
 }

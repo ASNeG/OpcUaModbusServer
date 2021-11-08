@@ -21,22 +21,25 @@
 #include <functional>
 #include <boost/shared_ptr.hpp>
 #include "Modbus/Modbus/ModbusTypes.h"
-#include "Modbus/Modbus/ModbusRTUTrx.h"
+#include "Modbus/ModbusRTU/ModbusRTUTrx.h"
 
 namespace Modbus
 {
 
-	using ReadCoilResFunc = std::function<void (const boost::system::error_code& ec)>;
+	using ReadCoilResFunc = std::function<void (
+		const boost::system::error_code& ec,
+		std::vector<bool>& coilVec)
+	>;
 
-	class ReadCoilTrx
+	class ReadCoilRTUClientTrx
 	: public ModbusRTUTrx
 	{
       public:
-		using SPtr = boost::shared_ptr<ReadCoilTrx>;
+		using SPtr = boost::shared_ptr<ReadCoilRTUClientTrx>;
 		using HandleResFunc = std::function<void (const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx)>;
 
-		ReadCoilTrx(void) : ModbusRTUTrx(ModbusFunction::ReadCoils) {}
-		virtual ~ReadCoilTrx(void) {}
+		ReadCoilRTUClientTrx(void) : ModbusRTUTrx(ModbusFunction::ReadCoils) {}
+		virtual ~ReadCoilRTUClientTrx(void) {}
 
 		virtual void handleEvent(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx) override {
 			handleResFunc_(ec, modbusTrx);

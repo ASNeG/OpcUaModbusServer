@@ -15,40 +15,39 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __ModbusError_ModbusError_h__
-#define __ModbusError_ModbusError_h__
-
-#include <boost/system/error_code.hpp>
-#include <string>
-#include <iostream>
-#include <sstream>
+#include "Modbus/ModbusRTU/ModbusRTUException.h"
 
 namespace Modbus
 {
 
-	enum class ModbusError : int
+	ModbusRTUExceptionCategory::ModbusRTUExceptionCategory(void)
 	{
-		Success,
-		SlaveInvalid,
-		DecoderError,
-		ChecksumError,
-	};
+	}
 
-	class ModbusErrorCategory
-	: public boost::system::error_category
+	ModbusRTUExceptionCategory::~ModbusRTUExceptionCategory(void)
 	{
-	  public:
+	}
 
-		ModbusErrorCategory(void);
-		virtual ~ModbusErrorCategory(void);
+	const char*
+	ModbusRTUExceptionCategory::name(void) const noexcept
+	{
+		return "ModbusRTUException";
+	}
 
-		const char *name(void) const noexcept;
-		std::string message(int ev) const;
-	};
+	std::string
+	ModbusRTUExceptionCategory::message(int ev) const
+	{
+		switch ((ModbusRTUException)ev)
+		{
+			case ModbusRTUException::Success: return "Success";
+			case ModbusRTUException::SlaveInvalid: return "slave invalid";
+			case ModbusRTUException::DecoderError: return "decoder error";
+			case ModbusRTUException::ChecksumError: return "checksum error";
+		}
 
-	#define MODBUS_ERROR(error_val, error_num) ModbusErrorCategory modbusError; \
-											   boost::system::error_code error_val{(int)error_num, modbusError};
+		std::stringstream ss;
+		ss << "unknown error (" << ev << ")";
+		return ss.str();
+	}
 
 }
-
-#endif

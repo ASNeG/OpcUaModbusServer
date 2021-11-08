@@ -15,9 +15,25 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "Modbus/Modbus/ModbusRTUClientTrx.h"
+#ifndef __Modbus_ModbusRTUServer_h__
+#define __Modbus_ModbusRTUServer_h__
+
+#include <stdint.h>
+#include <functional>
+
+#include "Modbus/ModbusRTU/ModbusRTU.h"
 
 namespace Modbus
 {
 
+	class ModbusRTUServer
+	: public ModbusRTU
+	{
+	  public:
+		ModbusRTUServer(void);
+		virtual ~ModbusRTUServer(void);
+	};
+
 }
+
+#endif

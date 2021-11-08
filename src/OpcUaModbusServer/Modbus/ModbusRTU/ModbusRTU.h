@@ -22,7 +22,7 @@
 #include <functional>
 #include <termios.h>
 #include "Modbus/Utility/BackgroundThread.h"
-#include "Modbus/Modbus/ModbusRTUTrx.h"
+#include "Modbus/ModbusRTU/ModbusRTUTrx.h"
 #include "Modbus/Modbus/Modbus.h"
 #include "Modbus/Utility/CRC16.h"
 

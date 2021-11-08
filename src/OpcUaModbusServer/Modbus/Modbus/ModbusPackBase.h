@@ -18,8 +18,10 @@
 #ifndef __Modbus_ModbusPackBase_h__
 #define __Modbus_ModbusPackBase_h__
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/system/error_code.hpp>
 #include "Modbus/Modbus/ModbusTypes.h"
+#include "Modbus/Modbus/ModbusException.h"
 
 namespace Modbus
 {
@@ -34,12 +36,19 @@ namespace Modbus
 		virtual ~ModbusPackBase(void);
 
 		uint8_t modbusFunction(void) const;
+		boost::system::error_code ec(void);
+		void ec(ModbusException ec);
 
 		virtual bool encode(std::ostream& os) const = 0;
 		virtual bool decode(std::istream& is) = 0;
 		virtual uint32_t neededSize(void) = 0;
 		virtual bool firstPart(void);
 		virtual bool lastPart(void);
+
+		bool decodeEC(std::istream& is);
+
+	  protected:
+		boost::system::error_code ec_;
 
 	  private:
 		ModbusFunction modbusFunction_;

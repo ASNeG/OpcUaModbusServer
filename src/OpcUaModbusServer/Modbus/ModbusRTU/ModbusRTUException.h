@@ -15,24 +15,39 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusRTUServer_h__
-#define __Modbus_ModbusRTUServer_h__
+#ifndef __Modbus_ModbusRTUException_h__
+#define __Modbus_ModbusRTUException_h__
 
-#include <stdint.h>
-#include <functional>
-
-#include "Modbus/Modbus/ModbusRTU.h"
+#include <boost/system/error_code.hpp>
+#include <string>
+#include <iostream>
+#include <sstream>
 
 namespace Modbus
 {
 
-	class ModbusRTUServer
-	: public ModbusRTU
+	enum class ModbusRTUException : int
+	{
+		Success,
+		SlaveInvalid,
+		DecoderError,
+		ChecksumError,
+	};
+
+	class ModbusRTUExceptionCategory
+	: public boost::system::error_category
 	{
 	  public:
-		ModbusRTUServer(void);
-		virtual ~ModbusRTUServer(void);
+
+		ModbusRTUExceptionCategory(void);
+		virtual ~ModbusRTUExceptionCategory(void);
+
+		const char *name(void) const noexcept;
+		std::string message(int ev) const;
 	};
+
+	#define MODBUS_RTU_ERROR(error_val, error_num) ModbusRTUExceptionCategory ModbusRTUException; \
+			boost::system::error_code error_val{(int)error_num, ModbusRTUException};
 
 }
 
