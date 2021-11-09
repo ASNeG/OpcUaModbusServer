@@ -30,6 +30,10 @@ namespace Modbus
 		const boost::system::error_code& ec,
 		std::vector<bool>& coilVec)
 	>;
+	using ReadDiscreteInputsResFunc = std::function<void (
+		const boost::system::error_code& ec,
+		std::vector<bool>& discreteInputsVec)
+	>;
 
 	class ReadCoilRTUClientTrx
 	: public ModbusRTUTrx
@@ -46,6 +50,24 @@ namespace Modbus
 		};
 
 		ReadCoilResFunc readCoilResFunc_ = nullptr;
+		HandleResFunc handleResFunc_ = nullptr;
+	};
+
+	class ReadDiscreteInputsRTUClientTrx
+	: public ModbusRTUTrx
+	{
+      public:
+		using SPtr = boost::shared_ptr<ReadDiscreteInputsRTUClientTrx>;
+		using HandleResFunc = std::function<void (const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx)>;
+
+		ReadDiscreteInputsRTUClientTrx(void) : ModbusRTUTrx(ModbusFunction::ReadDiscreteInputs) {}
+		virtual ~ReadDiscreteInputsRTUClientTrx(void) {}
+
+		virtual void handleEvent(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx) override {
+			handleResFunc_(ec, modbusTrx);
+		};
+
+		ReadDiscreteInputsResFunc readDiscreteInputsResFunc_ = nullptr;
 		HandleResFunc handleResFunc_ = nullptr;
 	};
 

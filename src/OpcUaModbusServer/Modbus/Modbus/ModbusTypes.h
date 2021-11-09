@@ -27,7 +27,7 @@ namespace Modbus
 
 	enum class ModbusFunction : uint8_t {
 		ReadCoils = 0x01,
-		ReadDescreteInputs = 0x02,
+		ReadDiscreteInputs = 0x02,
 		ReadHoldingRegisters = 0x03,
 		ReadInputRegisters = 0x04,
 		WriteSingleCoil = 0x05,

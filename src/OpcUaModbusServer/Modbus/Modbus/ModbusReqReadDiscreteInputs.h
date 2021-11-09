@@ -15,32 +15,38 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusRTUClient_h__
-#define __Modbus_ModbusRTUClient_h__
+#ifndef __Modbus_ModbusReqReadDiscreteInputs_h__
+#define __Modbus_ModbusReqReadDiscreteInputs_h__
 
-#include <stdint.h>
-#include <functional>
-
-#include "Modbus/ModbusRTU/ModbusRTU.h"
-#include "Modbus/ModbusRTU/ModbusRTUClientTrx.h"
+#include <Modbus/Modbus/ModbusPackBase.h>
 
 namespace Modbus
 {
 
-	class ModbusRTUClient
-	: public ModbusRTU
+	class ModbusReqReadDiscreteInputs
+	: public ModbusPackBase
 	{
 	  public:
-		ModbusRTUClient(void);
-		virtual ~ModbusRTUClient(void);
 
-		bool readCoilReq(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
-		bool readDiscreteInputsReq(ReadDiscreteInputsResFunc readDiscreteInptusResFunc, uint8_t slave, uint16_t address, uint16_t numberInputs);
+		using SPtr = boost::shared_ptr<ModbusReqReadDiscreteInputs>;
+
+		ModbusReqReadDiscreteInputs(void);
+		virtual ~ModbusReqReadDiscreteInputs(void);
+
+		void address(uint16_t address);
+		uint16_t address(void);
+		void numberInputs(uint16_t numberInputs);
+		uint16_t numberInputs(void);
+
+		virtual bool encode(std::ostream& os) const override;
+		virtual bool decode(std::istream& is) override;
+		virtual uint32_t neededSize(void) override;
 
 	  private:
+		uint32_t neededSize_ = 5;
 
-		void handleReadCoilRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx);
-		void handleReadDiscreteInputsRes(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusRTUTrx);
+		uint16_t address_ = 0;
+		uint16_t numberInputs_ = 0;
 	};
 
 }
