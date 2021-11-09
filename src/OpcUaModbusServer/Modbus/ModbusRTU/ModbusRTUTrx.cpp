@@ -20,6 +20,11 @@
 namespace Modbus
 {
 
+	ModbusRTUTrx::ModbusRTUTrx(void)
+	: ModbusTrx()
+	{
+	}
+
 	ModbusRTUTrx::ModbusRTUTrx(ModbusFunction modbusFunction)
 	: ModbusTrx(modbusFunction)
 	{

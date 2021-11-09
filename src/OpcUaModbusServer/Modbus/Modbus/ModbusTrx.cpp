@@ -20,13 +20,29 @@
 namespace Modbus
 {
 
+	ModbusTrx::ModbusTrx(void)
+	: modbusFunction_(ModbusFunction::None)
+	{
+	}
+
 	ModbusTrx::ModbusTrx(ModbusFunction modbusFunction)
 	: modbusFunction_(modbusFunction)
 	{
 	}
 
+	ModbusTrx::ModbusTrx(ModbusTrx& modbusTrx)
+	: modbusFunction_(modbusTrx.modbusFunction())
+	{
+	}
+
 	ModbusTrx::~ModbusTrx(void)
 	{
+	}
+
+	void
+	ModbusTrx::modbusFunction(ModbusFunction modbusFunction)
+	{
+		modbusFunction_ = modbusFunction;
 	}
 
 	ModbusFunction

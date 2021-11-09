@@ -34,6 +34,12 @@ namespace Modbus
 		virtual ~ModbusRTUServer(void);
 
 		bool registerModbusFunction(void);
+
+		void recvRequest(void);
+		void cancelRequest(void);
+
+	  private:
+
 	};
 
 }

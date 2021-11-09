@@ -34,8 +34,8 @@ namespace Modbus
 		ModbusRTUClient(void);
 		virtual ~ModbusRTUClient(void);
 
-		bool readCoilReq(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
-		bool readDiscreteInputsReq(ReadDiscreteInputsResFunc readDiscreteInptusResFunc, uint8_t slave, uint16_t address, uint16_t numberInputs);
+		bool sendReadCoilReq(ReadCoilResFunc readCoilResFunc, uint8_t slave, uint16_t address, uint16_t numberCoils);
+		bool sendReadDiscreteInputsReq(ReadDiscreteInputsResFunc readDiscreteInptusResFunc, uint8_t slave, uint16_t address, uint16_t numberInputs);
 
 	  private:
 

@@ -49,6 +49,7 @@ namespace Modbus
 		bool close(void);
 
 		bool sendRequest(const ModbusRTUTrx::SPtr& modbusTrx);
+		void recvRequest(void);
 
 	  private:
 		std::string device_ = "";
@@ -60,6 +61,9 @@ namespace Modbus
 		CRC16 crc16_;
 		boost::asio::posix::stream_descriptor* sd_ = nullptr;
 
+		//
+		// client function
+		//
 		void sendRequestStrand(
 			const ModbusRTUTrx::SPtr& modbusTrx
 		);
@@ -72,6 +76,18 @@ namespace Modbus
 			const ModbusRTUTrx::SPtr& modbusTrx
 		);
 		void recvResponseCompleteStrand(
+			const ModbusRTUTrx::SPtr& modbusTrx,
+			const boost::system::error_code& ec,
+			size_t bt
+		);
+
+		//
+		// server function
+		//
+		void recvRequestStrand(
+			const ModbusRTUTrx::SPtr& modbusTrx
+		);
+		void recvRequestCompleteStrand(
 			const ModbusRTUTrx::SPtr& modbusTrx,
 			const boost::system::error_code& ec,
 			size_t bt

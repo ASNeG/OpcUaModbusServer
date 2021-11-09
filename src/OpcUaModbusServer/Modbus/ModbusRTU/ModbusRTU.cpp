@@ -471,4 +471,59 @@ namespace Modbus
 		recvResponseStrand(modbusTrx);
 	};
 
+	void
+	ModbusRTU::recvRequest(void)
+	{
+		// we receive in the background thread
+		backgroundThread_.strand()->dispatch(
+			[this](void) {
+				auto modbusTrx = boost::make_shared<ModbusRTUTrx>();
+				recvRequestStrand(modbusTrx);
+			}
+		);
+	}
+
+	void
+	ModbusRTU::recvRequestStrand(
+		const ModbusRTUTrx::SPtr& modbusTrx
+	)
+	{
+		// read slave and function
+		boost::asio::async_read(
+			*sd_,
+			modbusTrx->recvBuffer(),
+			boost::asio::transfer_exactly(2),
+			backgroundThread_.strand()->wrap(
+				[this, modbusTrx](const boost::system::error_code& ec, std::size_t bt) {
+					recvRequestCompleteStrand(modbusTrx, ec, bt);
+				}
+			)
+		);
+	}
+
+	void
+	ModbusRTU::recvRequestCompleteStrand(
+		const ModbusRTUTrx::SPtr& modbusTrx,
+		const boost::system::error_code& ec,
+		size_t bt
+	)
+	{
+		std::iostream ios(&modbusTrx->recvBuffer());
+
+		// decode slave id
+		uint8_t slave;
+		ios.read((char*)&slave, 1);
+
+		// check slave id
+
+		// get function code from buffer
+		uint32_t size = modbusTrx->recvBuffer().size();
+		std::vector<uint8_t> target(size);
+		buffer_copy(boost::asio::buffer(target), modbusTrx->recvBuffer().data());
+		uint8_t function = target[0];
+
+		// check function code
+
+	}
+
 }

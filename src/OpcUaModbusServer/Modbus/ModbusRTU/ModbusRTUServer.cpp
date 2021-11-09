@@ -35,5 +35,17 @@ namespace Modbus
 		return true;
 	}
 
+	void
+	ModbusRTUServer::recvRequest(void)
+	{
+
+	}
+
+	void
+	ModbusRTUServer::cancelRequest(void)
+	{
+
+	}
+
 
 }

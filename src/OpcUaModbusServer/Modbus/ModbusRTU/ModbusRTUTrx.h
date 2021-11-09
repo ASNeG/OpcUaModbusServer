@@ -30,6 +30,7 @@ namespace Modbus
 
 		using SPtr = boost::shared_ptr<ModbusRTUTrx>;
 
+		ModbusRTUTrx(void);
 		ModbusRTUTrx(ModbusFunction modbusFunction);
 		virtual ~ModbusRTUTrx(void);
 

@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(RTU_ReadDiscreteInputs_request_response_async)
 	auto f = p.get_future();
 
 	boost::promise<void>* pp =  &p;
-	bool rc = modbusClient.readDiscreteInputsReq(
+	bool rc = modbusClient.sendReadDiscreteInputsReq(
 		[this, pp] (const boost::system::error_code& ec, std::vector<bool>& inputsVec) mutable {
 			std::cout << "handleReadDiscreteInputsRes" << std::endl;
 			std::cout << "size=" << inputsVec.size() << std::endl;
