@@ -55,7 +55,12 @@ namespace Modbus
 		uint8_t b;
 
 		// encode modbus function
-		b = (uint32_t)modbusFunction_;
+		if (ec_) {
+			b = (uint32_t)modbusFunction_ + 0x80;
+		}
+		else {
+			b = (uint32_t)modbusFunction_;
+		}
 		os.write((char*)&b, 1);
 
 		return true;
