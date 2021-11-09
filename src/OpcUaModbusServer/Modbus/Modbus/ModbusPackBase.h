@@ -31,6 +31,7 @@ namespace Modbus
 		Header,
 		Meta,
 		Data,
+		Error,
 		Tail
 	};
 
@@ -47,14 +48,14 @@ namespace Modbus
 		boost::system::error_code ec(void);
 		void ec(ModbusException ec);
 
-		virtual bool encode(std::ostream& os) const = 0;
-		virtual bool decode(std::istream& is) = 0;
+		virtual bool encode(std::ostream& os) const;
+		virtual bool decode(std::istream& is);
 		uint32_t neededSize(void);
 		bool firstPart(void);
 		bool lastPart(void);
 
+		bool encodeEC(std::ostream& os) const;
 		bool decodeEC(std::istream& is);
-		bool encodeEC(std::ostream& os);
 
 	  protected:
 		uint32_t neededSize_ = 1;

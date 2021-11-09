@@ -59,8 +59,13 @@ namespace Modbus
 		uint8_t b[2];
 
 		// encode modbus function
-		b[0] = modbusFunction();
-		os.write((char*)b, 1);
+		if (!ModbusPackBase::encode(os)) return false;
+
+		// encode error
+		if (ec_) {
+			if (!ModbusPackBase::encodeEC(os)) return false;
+			return true;
+		}
 
 		// encode address
 		b[0] = address_ >> 8;
@@ -82,28 +87,22 @@ namespace Modbus
 		{
 		  case ModbusPackState::Header:
 		  {
-			  uint8_t b;
-
 			  // decode modbus function
-			  is.read((char*)&b, 1);
-			  if (b != modbusFunction()) {
+			  if (!ModbusPackBase::decode(is)) return false;
 
-				  if (b == modbusFunction() + 0x80) {
-					  decodeEC(is);
-				  }
-				  else {
-					  is.read((char*)&b, 1);
-					  ec(ModbusException::IllegalFunction);
-				  }
-
-				  return false;
+			  if ((modbusFunction() & 0x80) == 0x80) {
+				  // receive error body
+				  neededSize_ = (uint32_t)1;
+				  modbusPackState_ = ModbusPackState::Error;
 			  }
-
-			  neededSize_ = (uint32_t)4;
-			  modbusPackState_ = ModbusPackState::Meta;
+			  else {
+				  // receive data body
+				  neededSize_ = (uint32_t)4;
+				  modbusPackState_ = ModbusPackState::Data;
+			  }
 			  break;
 		  }
-		  case ModbusPackState::Meta:
+		  case ModbusPackState::Data:
 		  {
 			  uint8_t b[2];
 
@@ -114,6 +113,14 @@ namespace Modbus
 			  // decode number of inputs
 			  is.read((char*)b, 2);
 			  numberCoils_ = (b[0] << 8) + b[1];
+
+			  neededSize_ = 0;
+			  modbusPackState_ = ModbusPackState::Tail;
+			  break;
+		  }
+		  case ModbusPackState::Error:
+		  {
+			  if (!ModbusPackBase::decodeEC(is)) return false;
 
 			  neededSize_ = 0;
 			  modbusPackState_ = ModbusPackState::Tail;
