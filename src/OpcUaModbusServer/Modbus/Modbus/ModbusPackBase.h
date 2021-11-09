@@ -26,6 +26,14 @@
 namespace Modbus
 {
 
+	enum class ModbusPackState
+	{
+		Header,
+		Meta,
+		Data,
+		Tail
+	};
+
 	class ModbusPackBase
 	{
 	  public:
@@ -41,13 +49,16 @@ namespace Modbus
 
 		virtual bool encode(std::ostream& os) const = 0;
 		virtual bool decode(std::istream& is) = 0;
-		virtual uint32_t neededSize(void) = 0;
-		virtual bool firstPart(void);
-		virtual bool lastPart(void);
+		uint32_t neededSize(void);
+		bool firstPart(void);
+		bool lastPart(void);
 
 		bool decodeEC(std::istream& is);
+		bool encodeEC(std::ostream& os);
 
 	  protected:
+		uint32_t neededSize_ = 1;
+		ModbusPackState modbusPackState_ = ModbusPackState::Header;
 		boost::system::error_code ec_;
 
 	  private:

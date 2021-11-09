@@ -39,14 +39,8 @@ namespace Modbus
 
 		virtual bool encode(std::ostream& os) const override;
 		virtual bool decode(std::istream& is) override;
-		virtual uint32_t neededSize(void) override;
-		virtual bool firstPart(void) override;
-		virtual bool lastPart(void) override;
 
 	  private:
-		ModbusStep modbusStep_ = ModbusStep::Step0;
-		uint32_t neededSize_ = 2;
-
 		std::vector<uint8_t> coils_;
 	};
 

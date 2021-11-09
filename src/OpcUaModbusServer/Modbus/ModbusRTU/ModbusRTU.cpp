@@ -24,6 +24,7 @@
 #include "Modbus/Utility/Log.h"
 #include "Modbus/ModbusRTU/ModbusRTU.h"
 #include "Modbus/ModbusRTU/ModbusRTUException.h"
+#include "Modbus/ModbusRTU/ModbusRTUFactory.h"
 
 namespace Modbus
 {
@@ -470,5 +471,79 @@ namespace Modbus
 		// read next chunk
 		recvResponseStrand(modbusTrx);
 	};
+
+	void
+	ModbusRTU::recvRequest(void)
+	{
+		// we receive in the background thread
+		backgroundThread_.strand()->dispatch(
+			[this](void) {
+				auto modbusTrx = boost::make_shared<ModbusRTUTrx>();
+				recvRequestStrand(modbusTrx);
+			}
+		);
+	}
+
+	void
+	ModbusRTU::recvRequestStrand(
+		const ModbusRTUTrx::SPtr& modbusTrx
+	)
+	{
+		// read slave and function
+		boost::asio::async_read(
+			*sd_,
+			modbusTrx->recvBuffer(),
+			boost::asio::transfer_exactly(2),
+			backgroundThread_.strand()->wrap(
+				[this, modbusTrx](const boost::system::error_code& ec, std::size_t bt) {
+					recvRequestCompleteStrand(modbusTrx, ec, bt);
+				}
+			)
+		);
+	}
+
+	void
+	ModbusRTU::recvRequestCompleteStrand(
+		const ModbusRTUTrx::SPtr& modbusTrx,
+		const boost::system::error_code& ec,
+		size_t bt
+	)
+	{
+		// check error code
+		if (ec) {
+			Log(LogLevel::Error, "recv request error")
+				.parameter("Device", device_)
+				.parameter("ErrorMessage", ec.message());
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+
+		std::iostream ios(&modbusTrx->recvBuffer());
+
+		// decode slave id
+		modbusTrx->decodeSlave(ios);
+
+		// get function code from buffer
+		uint32_t size = modbusTrx->recvBuffer().size();
+		std::vector<uint8_t> target(size);
+		buffer_copy(boost::asio::buffer(target), modbusTrx->recvBuffer().data());
+		uint8_t function = target[0];
+
+		// check function code and create modbus RTU Trx
+		auto newModbusTrx = ModbusRTUFactory::createModbusRTUTrx(function);
+		if (!newModbusTrx) {
+			MODBUS_RTU_ERROR(ec, ModbusRTUException::FunctionUnknwon)
+			Log(LogLevel::Error, "recv request function error")
+				.parameter("Device", device_)
+				.parameter("Function", (uint32_t)function)
+				.parameter("ErrorMessage", ec.message());
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+		newModbusTrx->slave(modbusTrx->slave());
+
+		// decode function
+
+	}
 
 }

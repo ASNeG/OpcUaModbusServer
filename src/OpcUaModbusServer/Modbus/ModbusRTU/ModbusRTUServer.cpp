@@ -29,4 +29,23 @@ namespace Modbus
 	{
 	}
 
+	bool
+	ModbusRTUServer::registerModbusFunction(void)
+	{
+		return true;
+	}
+
+	void
+	ModbusRTUServer::recvRequest(void)
+	{
+
+	}
+
+	void
+	ModbusRTUServer::cancelRequest(void)
+	{
+
+	}
+
+
 }

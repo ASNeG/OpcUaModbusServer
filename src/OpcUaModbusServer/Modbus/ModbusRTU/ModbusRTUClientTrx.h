@@ -28,12 +28,12 @@ namespace Modbus
 
 	using ReadCoilResFunc = std::function<void (
 		const boost::system::error_code& ec,
-		std::vector<bool>& coilVec)
-	>;
+		std::vector<bool>& coilVec
+	)>;
 	using ReadDiscreteInputsResFunc = std::function<void (
 		const boost::system::error_code& ec,
-		std::vector<bool>& discreteInputsVec)
-	>;
+		std::vector<bool>& discreteInputsVec
+	)>;
 
 	class ReadCoilRTUClientTrx
 	: public ModbusRTUTrx

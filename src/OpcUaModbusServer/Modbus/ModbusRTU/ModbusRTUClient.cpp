@@ -36,7 +36,7 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTUClient::readCoilReq(
+	ModbusRTUClient::sendReadCoilReq(
 		ReadCoilResFunc readCoilResFunc,
 		uint8_t slave,
 		uint16_t address,
@@ -67,7 +67,7 @@ namespace Modbus
 	}
 
 	bool
-	ModbusRTUClient::readDiscreteInputsReq(
+	ModbusRTUClient::sendReadDiscreteInputsReq(
 		ReadDiscreteInputsResFunc readDiscreteInputsResFunc,
 		uint8_t slave,
 		uint16_t address,

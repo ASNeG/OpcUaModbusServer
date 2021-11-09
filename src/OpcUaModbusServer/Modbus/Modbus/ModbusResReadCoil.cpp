@@ -67,9 +67,9 @@ namespace Modbus
 	{
 		uint8_t b;
 
-		switch (modbusStep_)
+		switch (modbusPackState_)
 		{
-		  case ModbusStep::Step0:
+		  case ModbusPackState::Header:
 		  {
 			  // decode modbus function
 			  is.read((char*)&b, 1);
@@ -86,6 +86,13 @@ namespace Modbus
 				  return false;
 			  }
 
+			  neededSize_ = 1;
+			  modbusPackState_ = ModbusPackState::Meta;
+			  break;
+		  }
+		  case ModbusPackState::Meta:
+		  {
+
 			  // decode number of coil bytes
 			  is.read((char*)&b, 1);
 			  if ((uint32_t)b > 251) {
@@ -94,10 +101,10 @@ namespace Modbus
 			  }
 
 			  neededSize_ = (uint32_t)b;
-			  modbusStep_ = ModbusStep::Step1;
+			  modbusPackState_ = ModbusPackState::Data;
 			  break;
 		  }
-		  case ModbusStep::Step1:
+		  case ModbusPackState::Data:
 		  {
 			  // decode coil bytes
 			  for (uint8_t idx = 0; idx < neededSize_; idx++) {
@@ -106,31 +113,12 @@ namespace Modbus
 			  }
 
 			  neededSize_ = 0;
-			  modbusStep_ = ModbusStep::Step2;
+			  modbusPackState_ = ModbusPackState::Tail;
 			  break;
 		  }
 		}
 
 		return true;
 	}
-
-	uint32_t
-	ModbusResReadCoil::neededSize(void)
-	{
-		return neededSize_;
-	}
-
-	bool
-	ModbusResReadCoil::firstPart(void)
-	{
-		return modbusStep_ == ModbusStep::Step0;
-	}
-
-	bool
-	ModbusResReadCoil::lastPart(void)
-	{
-		return modbusStep_ == ModbusStep::Step1;
-	}
-
 
 }

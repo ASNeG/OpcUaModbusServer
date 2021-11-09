@@ -15,35 +15,9 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusResReadDiscreteInputs_h__
-#define __Modbus_ModbusResReadDiscreteInputs_h__
-
-#include <vector>
-#include "Modbus/Modbus/ModbusPackBase.h"
+#include "Modbus/ModbusRTU/ModbusRTUServerTrx.h"
 
 namespace Modbus
 {
 
-	class ModbusResReadDiscreteInputs
-	: public ModbusPackBase
-	{
-	  public:
-
-		using SPtr = boost::shared_ptr<ModbusResReadDiscreteInputs>;
-
-		ModbusResReadDiscreteInputs(void);
-		virtual ~ModbusResReadDiscreteInputs(void);
-
-		void inputs(const std::vector<uint8_t>& inputs);
-		std::vector<uint8_t> inputs(void);
-
-		virtual bool encode(std::ostream& os) const override;
-		virtual bool decode(std::istream& is) override;
-
-	  private:
-		std::vector<uint8_t> inputs_;
-	};
-
 }
-
-#endif

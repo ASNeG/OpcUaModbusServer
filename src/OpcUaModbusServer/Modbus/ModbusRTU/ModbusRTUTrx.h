@@ -30,6 +30,7 @@ namespace Modbus
 
 		using SPtr = boost::shared_ptr<ModbusRTUTrx>;
 
+		ModbusRTUTrx(void);
 		ModbusRTUTrx(ModbusFunction modbusFunction);
 		virtual ~ModbusRTUTrx(void);
 
@@ -37,6 +38,9 @@ namespace Modbus
 		uint8_t slave(void);
 
 		virtual void handleEvent(const boost::system::error_code& ec, const ModbusRTUTrx::SPtr& modbusTrx) {};
+
+		bool encodeSlave(std::ostream& os) const;
+		bool decodeSlave(std::istream& is);
 
 	  private:
 		uint8_t slave_ = 0;

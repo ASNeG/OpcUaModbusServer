@@ -49,16 +49,22 @@ namespace Modbus
 		ec_ = errorCode;
 	}
 
+	uint32_t
+	ModbusPackBase::neededSize(void)
+	{
+		return neededSize_;
+	}
+
 	bool
 	ModbusPackBase::firstPart(void)
 	{
-		return true;
+		return modbusPackState_ == ModbusPackState::Header;
 	}
 
 	bool
 	ModbusPackBase::lastPart(void)
 	{
-		return true;
+		return modbusPackState_ == ModbusPackState::Data;
 	}
 
 	bool
@@ -71,6 +77,17 @@ namespace Modbus
 
 		MODBUS_EXCEPTION(errorCode, (uint32_t)ec)
 		ec_ = errorCode;
+
+		return true;
+	}
+
+	bool
+	ModbusPackBase::encodeEC(std::ostream& os)
+	{
+		uint8_t ec = ec_.value();
+
+		// encode error code
+		os.write((char*)&ec, 1);
 
 		return true;
 	}

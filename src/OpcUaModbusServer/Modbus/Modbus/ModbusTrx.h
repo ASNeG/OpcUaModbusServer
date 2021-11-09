@@ -32,9 +32,12 @@ namespace Modbus
 
 		using SPtr = boost::shared_ptr<ModbusTrx>;
 
+		ModbusTrx(void);
 		ModbusTrx(ModbusFunction modbusFunction);
+		ModbusTrx(ModbusTrx& modbusTrx);
 		virtual ~ModbusTrx(void);
 
+		void modbusFunction(ModbusFunction modbusFunction);
 		ModbusFunction modbusFunction(void);
 		void req(const ModbusPackBase::SPtr& req);
 		ModbusPackBase::SPtr& req(void);
