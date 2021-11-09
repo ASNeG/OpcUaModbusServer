@@ -513,8 +513,7 @@ namespace Modbus
 		// decode slave id
 		uint8_t slave;
 		ios.read((char*)&slave, 1);
-
-		// check slave id
+		modbusTrx->slave(slave);
 
 		// get function code from buffer
 		uint32_t size = modbusTrx->recvBuffer().size();
