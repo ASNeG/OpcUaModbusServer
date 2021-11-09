@@ -78,30 +78,50 @@ namespace Modbus
 	bool
 	ModbusReqReadCoil::decode(std::istream& is)
 	{
-		uint8_t b[2];
+		switch (modbusPackState_)
+		{
+		  case ModbusPackState::Header:
+		  {
+			  uint8_t b;
 
-		// decode modbus function
-		is.read((char*)b, 1);
-		if (b[0] != modbusFunction()) {
-			return false;
+			  // decode modbus function
+			  is.read((char*)&b, 1);
+			  if (b != modbusFunction()) {
+
+				  if (b == modbusFunction() + 0x80) {
+					  decodeEC(is);
+				  }
+				  else {
+					  is.read((char*)&b, 1);
+					  ec(ModbusException::IllegalFunction);
+				  }
+
+				  return false;
+			  }
+
+			  neededSize_ = (uint32_t)4;
+			  modbusPackState_ = ModbusPackState::Meta;
+			  break;
+		  }
+		  case ModbusPackState::Meta:
+		  {
+			  uint8_t b[2];
+
+			  // decode address
+			  is.read((char*)b, 2);
+			  address_ = (b[0] << 8) + b[1];
+
+			  // decode number of inputs
+			  is.read((char*)b, 2);
+			  numberCoils_ = (b[0] << 8) + b[1];
+
+			  neededSize_ = 0;
+			  modbusPackState_ = ModbusPackState::Tail;
+			  break;
+		  }
 		}
 
-		// decode address
-		is.read((char*)b, 2);
-		address_ = (b[0] << 8) + b[1];
-
-		// decode number of coils
-		is.read((char*)b, 2);
-		numberCoils_ = (b[0] << 8) + b[1];
-
-		neededSize_ = 0;
-		return true;
-	}
-
-	uint32_t
-	ModbusReqReadCoil::neededSize(void)
-	{
-		return neededSize_;
+	   return true;
 	}
 
 }

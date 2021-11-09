@@ -43,6 +43,7 @@ namespace Modbus
 			case ModbusRTUException::SlaveInvalid: return "slave invalid";
 			case ModbusRTUException::DecoderError: return "decoder error";
 			case ModbusRTUException::ChecksumError: return "checksum error";
+			case ModbusRTUException::FunctionUnknwon: return "function unknown";
 		}
 
 		std::stringstream ss;

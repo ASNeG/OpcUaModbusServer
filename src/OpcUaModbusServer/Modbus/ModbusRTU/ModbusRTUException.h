@@ -32,6 +32,7 @@ namespace Modbus
 		SlaveInvalid,
 		DecoderError,
 		ChecksumError,
+		FunctionUnknwon,
 	};
 
 	class ModbusRTUExceptionCategory

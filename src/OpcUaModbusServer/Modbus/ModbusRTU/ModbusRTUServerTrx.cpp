@@ -15,17 +15,9 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "Modbus/Modbus/ModbusFactory.h"
+#include "Modbus/ModbusRTU/ModbusRTUServerTrx.h"
 
 namespace Modbus
 {
-
-	ModbusFactory::ModbusFactory(void)
-	{
-	}
-
-	ModbusFactory::~ModbusFactory(void)
-	{
-	}
 
 }

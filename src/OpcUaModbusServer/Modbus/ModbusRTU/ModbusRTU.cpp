@@ -24,6 +24,7 @@
 #include "Modbus/Utility/Log.h"
 #include "Modbus/ModbusRTU/ModbusRTU.h"
 #include "Modbus/ModbusRTU/ModbusRTUException.h"
+#include "Modbus/ModbusRTU/ModbusRTUFactory.h"
 
 namespace Modbus
 {
@@ -508,12 +509,19 @@ namespace Modbus
 		size_t bt
 	)
 	{
+		// check error code
+		if (ec) {
+			Log(LogLevel::Error, "recv request error")
+				.parameter("Device", device_)
+				.parameter("ErrorMessage", ec.message());
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+
 		std::iostream ios(&modbusTrx->recvBuffer());
 
 		// decode slave id
-		uint8_t slave;
-		ios.read((char*)&slave, 1);
-		modbusTrx->slave(slave);
+		modbusTrx->decodeSlave(ios);
 
 		// get function code from buffer
 		uint32_t size = modbusTrx->recvBuffer().size();
@@ -521,7 +529,20 @@ namespace Modbus
 		buffer_copy(boost::asio::buffer(target), modbusTrx->recvBuffer().data());
 		uint8_t function = target[0];
 
-		// check function code
+		// check function code and create modbus RTU Trx
+		auto newModbusTrx = ModbusRTUFactory::createModbusRTUTrx(function);
+		if (!newModbusTrx) {
+			MODBUS_RTU_ERROR(ec, ModbusRTUException::FunctionUnknwon)
+			Log(LogLevel::Error, "recv request function error")
+				.parameter("Device", device_)
+				.parameter("Function", (uint32_t)function)
+				.parameter("ErrorMessage", ec.message());
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+		newModbusTrx->slave(modbusTrx->slave());
+
+		// decode function
 
 	}
 

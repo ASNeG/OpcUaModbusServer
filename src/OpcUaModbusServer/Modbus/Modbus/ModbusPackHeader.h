@@ -15,17 +15,26 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __ModbusFactory_ModbusFactory_h__
-#define __ModbusFactory_ModbusFactory_h__
+#ifndef __Modbus_ModbusPackHeader_h__
+#define __Modbus_ModbusPackHeader_h__
+
+#include <Modbus/Modbus/ModbusPackBase.h>
 
 namespace Modbus
 {
-	class ModbusFactory
+
+	class ModbusPackHeader
+	: public ModbusPackBase
 	{
 	  public:
 
-		ModbusFactory(void);
-		virtual ~ModbusFactory(void);
+		using SPtr = boost::shared_ptr<ModbusPackHeader>;
+
+		ModbusPackHeader(void);
+		virtual ~ModbusPackHeader(void);
+
+		virtual bool encode(std::ostream& os) const override;
+		virtual bool decode(std::istream& is) override;
 	};
 
 }

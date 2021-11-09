@@ -78,30 +78,51 @@ namespace Modbus
 	bool
 	ModbusReqReadDiscreteInputs::decode(std::istream& is)
 	{
-		uint8_t b[2];
 
-		// decode modbus function
-		is.read((char*)b, 1);
-		if (b[0] != modbusFunction()) {
-			return false;
+		switch (modbusPackState_)
+		{
+		  case ModbusPackState::Header:
+		  {
+			  uint8_t b;
+
+			  // decode modbus function
+			  is.read((char*)&b, 1);
+			  if (b != modbusFunction()) {
+
+				  if (b == modbusFunction() + 0x80) {
+					  decodeEC(is);
+				  }
+				  else {
+					  is.read((char*)&b, 1);
+					  ec(ModbusException::IllegalFunction);
+				  }
+
+				  return false;
+			  }
+
+			  neededSize_ = (uint32_t)4;
+			  modbusPackState_ = ModbusPackState::Meta;
+			  break;
+		  }
+		  case ModbusPackState::Meta:
+		  {
+			  uint8_t b[2];
+
+			  // decode address
+			  is.read((char*)b, 2);
+			  address_ = (b[0] << 8) + b[1];
+
+			  // decode number of inputs
+			  is.read((char*)b, 2);
+			  numberInputs_ = (b[0] << 8) + b[1];
+
+			  neededSize_ = 0;
+			  modbusPackState_ = ModbusPackState::Tail;
+			  break;
+		  }
 		}
 
-		// decode address
-		is.read((char*)b, 2);
-		address_ = (b[0] << 8) + b[1];
-
-		// decode number of inputs
-		is.read((char*)b, 2);
-		numberInputs_ = (b[0] << 8) + b[1];
-
-		neededSize_ = 0;
-		return true;
-	}
-
-	uint32_t
-	ModbusReqReadDiscreteInputs::neededSize(void)
-	{
-		return neededSize_;
+	   return true;
 	}
 
 }

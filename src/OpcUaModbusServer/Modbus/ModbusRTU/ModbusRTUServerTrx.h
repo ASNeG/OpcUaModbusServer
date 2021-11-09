@@ -15,33 +15,35 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __Modbus_ModbusResReadDiscreteInputs_h__
-#define __Modbus_ModbusResReadDiscreteInputs_h__
+#ifndef __Modbus_ModbusRTUServerTrx_h__
+#define __Modbus_ModbusRTUServerTrx_h__
 
-#include <vector>
-#include "Modbus/Modbus/ModbusPackBase.h"
+#include <functional>
+#include <boost/shared_ptr.hpp>
+#include "Modbus/Modbus/ModbusTypes.h"
+#include "Modbus/ModbusRTU/ModbusRTUTrx.h"
 
 namespace Modbus
 {
 
-	class ModbusResReadDiscreteInputs
-	: public ModbusPackBase
+	class ReadCoilRTUServerTrx
+	: public ModbusRTUTrx
 	{
-	  public:
+      public:
+		using SPtr = boost::shared_ptr<ReadCoilRTUServerTrx>;
 
-		using SPtr = boost::shared_ptr<ModbusResReadDiscreteInputs>;
+		ReadCoilRTUServerTrx(void) : ModbusRTUTrx(ModbusFunction::ReadCoils) {}
+		virtual ~ReadCoilRTUServerTrx(void) {}
+	};
 
-		ModbusResReadDiscreteInputs(void);
-		virtual ~ModbusResReadDiscreteInputs(void);
+	class ReadDiscreteInputsRTUServerTrx
+	: public ModbusRTUTrx
+	{
+      public:
+		using SPtr = boost::shared_ptr<ReadDiscreteInputsRTUServerTrx>;
 
-		void inputs(const std::vector<uint8_t>& inputs);
-		std::vector<uint8_t> inputs(void);
-
-		virtual bool encode(std::ostream& os) const override;
-		virtual bool decode(std::istream& is) override;
-
-	  private:
-		std::vector<uint8_t> inputs_;
+		ReadDiscreteInputsRTUServerTrx(void) : ModbusRTUTrx(ModbusFunction::ReadDiscreteInputs) {}
+		virtual ~ReadDiscreteInputsRTUServerTrx(void) {}
 	};
 
 }

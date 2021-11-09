@@ -46,4 +46,21 @@ namespace Modbus
 		return slave_;
 	}
 
+	bool
+	ModbusRTUTrx::encodeSlave(std::ostream& os) const
+	{
+		// encode slave
+		os.write((char*)&slave_, 1);
+
+		return true;
+	}
+
+	bool
+	ModbusRTUTrx::decodeSlave(std::istream& is)
+	{
+		is.read((char*)&slave_, 1);
+
+		return true;
+	}
+
 }
