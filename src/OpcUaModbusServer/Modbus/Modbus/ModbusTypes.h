@@ -46,6 +46,9 @@ namespace Modbus
 		WriteAndReadRegisters = 0x17,
 		ReadFifoQueue = 0x18,
 		EncapsulatedInterfaceTransport = 0x2B,
+
+		ReadCoilsError = 0x81,
+		ReadDiscreteInputsError = 0x82,
 	};
 
 	enum class ModbusStep : uint8_t {

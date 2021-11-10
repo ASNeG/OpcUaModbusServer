@@ -49,6 +49,39 @@ namespace Modbus
 		ec_ = errorCode;
 	}
 
+	bool
+	ModbusPackBase::encode(std::ostream& os) const
+	{
+		uint8_t b;
+
+		// encode modbus function
+		if (ec_) {
+			b = (uint32_t)modbusFunction_ + 0x80;
+		}
+		else {
+			b = (uint32_t)modbusFunction_;
+		}
+		os.write((char*)&b, 1);
+
+		return true;
+	}
+
+	bool
+	ModbusPackBase::decode(std::istream& is)
+	{
+		uint8_t b;
+
+		// decode modbus function
+		is.read((char*)&b, 1);
+		if (b != modbusFunction() && b != modbusFunction() + 0x80) {
+			ec(ModbusException::IllegalFunction);
+			return false;
+		}
+		modbusFunction_ = (ModbusFunction)b;
+
+		return true;
+	}
+
 	uint32_t
 	ModbusPackBase::neededSize(void)
 	{
@@ -64,7 +97,18 @@ namespace Modbus
 	bool
 	ModbusPackBase::lastPart(void)
 	{
-		return modbusPackState_ == ModbusPackState::Data;
+		return modbusPackState_ == ModbusPackState::Data || modbusPackState_ == ModbusPackState::Error;
+	}
+
+	bool
+	ModbusPackBase::encodeEC(std::ostream& os) const
+	{
+		uint8_t ec = ec_.value();
+
+		// encode error code
+		os.write((char*)&ec, 1);
+
+		return true;
 	}
 
 	bool
@@ -77,17 +121,6 @@ namespace Modbus
 
 		MODBUS_EXCEPTION(errorCode, (uint32_t)ec)
 		ec_ = errorCode;
-
-		return true;
-	}
-
-	bool
-	ModbusPackBase::encodeEC(std::ostream& os)
-	{
-		uint8_t ec = ec_.value();
-
-		// encode error code
-		os.write((char*)&ec, 1);
 
 		return true;
 	}

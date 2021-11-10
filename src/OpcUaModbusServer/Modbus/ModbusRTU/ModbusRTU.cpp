@@ -417,12 +417,13 @@ namespace Modbus
 
 		// decode and check slave
 		if (firstPart) {
-			ios.read((char*)b, 1);
+			uint8_t slave = modbusTrx->slave();
+			modbusTrx->decodeSlave(ios);
 
 			crc16_.reset();
-			crc16_.process(b, 1);
+			crc16_.process(modbusTrx->slave());
 
-			if (b[0] != modbusTrx->slave()) {
+			if (slave != modbusTrx->slave()) {
 				MODBUS_RTU_ERROR(ec, ModbusRTUException::SlaveInvalid)
 				Log(LogLevel::Error, "recv response error")
 					.parameter("Device", device_)
@@ -478,7 +479,7 @@ namespace Modbus
 		// we receive in the background thread
 		backgroundThread_.strand()->dispatch(
 			[this](void) {
-				auto modbusTrx = boost::make_shared<ModbusRTUTrx>();
+				auto modbusTrx = ModbusRTUFactory::createModbusRTUTrx((uint8_t)ModbusFunction::None);
 				recvRequestStrand(modbusTrx);
 			}
 		);
@@ -489,6 +490,12 @@ namespace Modbus
 		const ModbusRTUTrx::SPtr& modbusTrx
 	)
 	{
+		// receive some bytes from slave
+		uint32_t size = modbusTrx->res()->neededSize();
+
+		if (modbusTrx->req()->firstPart()) size = size + 1;	// read slave
+		if (modbusTrx->req()->lastPart()) size = size + 2; // read crc
+
 		// read slave and function
 		boost::asio::async_read(
 			*sd_,
@@ -518,32 +525,76 @@ namespace Modbus
 			return;
 		}
 
+		bool firstPart = modbusTrx->res()->firstPart();
+		bool lastPart = modbusTrx->res()->lastPart();
+
 		std::iostream ios(&modbusTrx->recvBuffer());
 
-		// decode slave id
-		modbusTrx->decodeSlave(ios);
+		if (firstPart) {
+			// decode slave id
+			modbusTrx->decodeSlave(ios);
 
-		// get function code from buffer
+			crc16_.reset();
+			crc16_.process(modbusTrx->slave());
+
+			// get function code from buffer
+			uint32_t size = modbusTrx->recvBuffer().size();
+			std::vector<uint8_t> target(size);
+			buffer_copy(boost::asio::buffer(target), modbusTrx->recvBuffer().data());
+			uint8_t function = target[0];
+
+			// check function code and create modbus RTU Trx
+			auto newModbusTrx = ModbusRTUFactory::createModbusRTUTrx(function);
+			if (!newModbusTrx) {
+				MODBUS_RTU_ERROR(ec, ModbusRTUException::FunctionUnknwon)
+				Log(LogLevel::Error, "recv request error, because function unknown")
+					.parameter("Device", device_)
+					.parameter("Function", (uint32_t)function)
+					.parameter("ErrorMessage", ec.message());
+				modbusTrx->handleEvent(ec, modbusTrx);
+				return;
+			}
+		}
+
+		// calculate CRC
 		uint32_t size = modbusTrx->recvBuffer().size();
-		std::vector<uint8_t> target(size);
-		buffer_copy(boost::asio::buffer(target), modbusTrx->recvBuffer().data());
-		uint8_t function = target[0];
+		if (lastPart) size -= 2;
+		crc16_.process(modbusTrx->recvBuffer(), size);
 
-		// check function code and create modbus RTU Trx
-		auto newModbusTrx = ModbusRTUFactory::createModbusRTUTrx(function);
-		if (!newModbusTrx) {
-			MODBUS_RTU_ERROR(ec, ModbusRTUException::FunctionUnknwon)
-			Log(LogLevel::Error, "recv request function error")
+		// decode request
+		if (!modbusTrx->req()->decode(ios)) {
+			MODBUS_RTU_ERROR(ec, ModbusRTUException::DecoderError)
+			Log(LogLevel::Error, "receive request error because response decoder error")
 				.parameter("Device", device_)
-				.parameter("Function", (uint32_t)function)
-				.parameter("ErrorMessage", ec.message());
+				.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
 			modbusTrx->handleEvent(ec, modbusTrx);
 			return;
 		}
-		newModbusTrx->slave(modbusTrx->slave());
 
-		// decode function
+		// decode and check crc
+		if (lastPart) {
+			// decode crc
+			uint8_t b[2];
+			ios.read((char*)b, 2);
 
+			// check crc
+			uint16_t checksum = (b[1] << 8) + b[0];
+			if (!crc16_.validateChecksum(checksum)) {
+				MODBUS_RTU_ERROR(ec, ModbusRTUException::ChecksumError)
+				Log(LogLevel::Error, "receive request error because received checksum error")
+					.parameter("Device", device_)
+					.parameter("ModbusFunction", (uint32_t)modbusTrx->req()->modbusFunction());
+				modbusTrx->handleEvent(ec, modbusTrx);
+				return;
+			}
+
+			MODBUS_RTU_ERROR(ec, ModbusRTUException::Success)
+			modbusTrx->handleEvent(ec, modbusTrx);
+			return;
+		}
+
+		// read next chunk
+		recvRequestStrand(modbusTrx);
 	}
 
 }

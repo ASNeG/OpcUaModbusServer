@@ -47,8 +47,13 @@ namespace Modbus
 		uint8_t b;
 
 		// encode modbus function
-		b = modbusFunction();
-		os.write((char*)&b, 1);
+		if (!ModbusPackBase::encode(os)) return false;
+
+		// encode error
+		if (ec_) {
+			if (!ModbusPackBase::encodeEC(os)) return false;
+			return true;
+		}
 
 		// encode number of input bytes
 		b = inputs_.size();
@@ -72,22 +77,18 @@ namespace Modbus
 		  case ModbusPackState::Header:
 		  {
 			  // decode modbus function
-			  is.read((char*)&b, 1);
-			  if (b != modbusFunction()) {
+			  if (!ModbusPackBase::decode(is)) return false;
 
-				  if (b == modbusFunction() + 0x80) {
-					  decodeEC(is);
-				  }
-				  else {
-					  is.read((char*)&b, 1);
-					  ec(ModbusException::IllegalFunction);
-				  }
-
-				  return false;
+			  if ((modbusFunction() & 0x80) == 0x80) {
+				  // receive error body
+				  neededSize_ = (uint32_t)1;
+				  modbusPackState_ = ModbusPackState::Error;
 			  }
-
-			  neededSize_ = 1;
-			  modbusPackState_ = ModbusPackState::Meta;
+			  else {
+				  // receive meta body
+				  neededSize_ = (uint32_t)1;
+				  modbusPackState_ = ModbusPackState::Meta;
+			  }
 			  break;
 		  }
 		  case ModbusPackState::Meta:
@@ -111,6 +112,14 @@ namespace Modbus
 				  is.read((char*)&b, 1);
 				  inputs_.push_back(b);
 			  }
+
+			  neededSize_ = 0;
+			  modbusPackState_ = ModbusPackState::Tail;
+			  break;
+		  }
+		  case ModbusPackState::Error:
+		  {
+			  if (!ModbusPackBase::decodeEC(is)) return false;
 
 			  neededSize_ = 0;
 			  modbusPackState_ = ModbusPackState::Tail;
